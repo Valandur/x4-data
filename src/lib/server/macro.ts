@@ -10,7 +10,8 @@ import { Logger } from './logger';
 const CACHE = '.cache/macro';
 const CACHE_PATHS = '.cache/macro-paths';
 
-const macros: Map<string, Macro[]> = new Map();
+const macros: Map<string, Macro> = new Map();
+const byClass: Map<string, Macro[]> = new Map();
 const logger = new Logger('macro');
 const parser = new XMLParser({
 	ignoreDeclaration: true,
@@ -21,16 +22,14 @@ const parser = new XMLParser({
 
 logger.debug('Loading...');
 
-let total = 0;
-
-const cachedMacros = await readFile(CACHE, 'utf-8')
+const cache = await readFile(CACHE, 'utf-8')
 	.then((res) => JSON.parse(res))
 	.catch(() => null);
 
-if (cachedMacros) {
-	for (const cachedMacro of cachedMacros) {
-		macros.set(cachedMacro[0], cachedMacro[1]);
-		total += cachedMacro[1].length;
+if (cache) {
+	for (const cachedMacro of cache) {
+		byClass.set(cachedMacro.class, (byClass.get(cachedMacro.class) || []).concat(cachedMacro));
+		macros.set(cachedMacro.name, cachedMacro);
 	}
 	logger.debug('Restored macros from cache');
 } else {
@@ -53,41 +52,75 @@ if (cachedMacros) {
 			continue;
 		}
 
-		if (!xmlMacros.length) {
+		if (!('length' in xmlMacros)) {
 			xmlMacros = [xmlMacros];
 		}
 
-		for (const { name, class: _class, alias, component, properties } of xmlMacros) {
-			const clazz = _class || 'unknown';
-			let objs = macros.get(clazz);
+		for (const xmlMacro of xmlMacros) {
+			const name = xmlMacro.name;
+			const clazz = xmlMacro.class ?? 'unknown';
+			let objs = byClass.get(clazz);
 			if (!objs) {
 				objs = [];
-				macros.set(clazz, objs);
+				byClass.set(clazz, objs);
 			}
 
-			objs.push({
-				...properties,
-				component,
-				name,
+			let connections = xmlMacro.connections?.connection ?? [];
+			if (!('length' in connections)) {
+				connections = [connections];
+			}
+
+			const macro: Macro = {
 				class: clazz,
-				alias,
-				source: fileName
-			});
-			total++;
+				name: name,
+				alias: xmlMacro.alias,
+				component: xmlMacro.component,
+				properties: xmlMacro.properties ?? {},
+				connections: connections,
+				source: fileName,
+				versions: []
+			};
+
+			const other = macros.get(name);
+			if (other) {
+				other.versions.push(macro);
+			} else {
+				objs.push(macro);
+				macros.set(name, macro);
+			}
 		}
 	}
 
 	await mkdir(dirname(CACHE), { recursive: true });
-	await writeFile(CACHE, JSON.stringify([...macros.entries()]));
+	await writeFile(CACHE, JSON.stringify([...macros.values()]));
 }
 
-logger.info(`Loaded ${total} macros in ${macros.size} classes`);
+for (const macro of macros.values()) {
+	if (!macro.connections) {
+		continue;
+	}
 
-export const MACRO_TYPES = [...macros.entries()].map(([name, macros]) => ({
+	for (let i = 0; i < macro.connections.length; i++) {
+		const conn = macro.connections[i];
+		if (!conn.macro) {
+			continue;
+		}
+
+		const otherMacro = macros.get(conn.macro.ref) || null;
+		macro.connections[i] = {
+			...conn,
+			resolved: otherMacro
+		};
+	}
+}
+
+logger.info(`Loaded ${macros.size} macros in ${byClass.size} classes`);
+
+export const MACRO_TYPES = [...byClass.entries()].map(([name, macros]) => ({
 	name,
 	count: macros.length
 }));
 
 export function getMacrosOfType<T extends Macro = Macro>(...types: string[]): T[] {
-	return types.flatMap((type) => macros.get(type) || []) as T[];
+	return types.flatMap((type) => byClass.get(type) ?? []) as T[];
 }

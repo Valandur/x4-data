@@ -1,24 +1,6 @@
-import type {
-	PropertyAmmunition,
-	PropertyBullet,
-	PropertyDamage,
-	PropertyExplosionDamage,
-	PropertyHeat,
-	PropertyHull,
-	PropertyIdentification,
-	PropertyMissle,
-	PropertyPeople,
-	PropertyPurpose,
-	PropertyRef,
-	PropertyReload,
-	PropertyRotationAcceleration,
-	PropertyRotationSpeed,
-	PropertyShip,
-	PropertySoftware,
-	PropertyStorage,
-	PropertyThruster,
-	PropertyWeapon
-} from './Properties';
+import type { ComponentRef } from './Component';
+import type { ConnectionRef, ConnectionResolved } from './Connection';
+import type { Properties } from './Properties';
 
 export interface Macro {
 	class: string;
@@ -26,23 +8,9 @@ export interface Macro {
 	alias: string;
 	source: string;
 
-	component?: PropertyRef;
-	ammunition?: PropertyAmmunition;
-	bullet?: PropertyBullet | PropertyRef;
-	damage?: PropertyDamage;
-	explosiondamage?: PropertyExplosionDamage;
-	heat?: PropertyHeat;
-	hull?: PropertyHull;
-	identification?: PropertyIdentification;
-	missle?: PropertyMissle;
-	people?: PropertyPeople;
-	purpose?: PropertyPurpose;
-	reload?: PropertyReload;
-	rotationacceleration?: PropertyRotationAcceleration;
-	rotationspeed?: PropertyRotationSpeed;
-	ship?: PropertyShip;
-	software?: PropertySoftware;
-	storage?: PropertyStorage;
-	thruster?: PropertyThruster;
-	weapon?: PropertyWeapon;
+	component?: ComponentRef;
+	properties: Properties;
+	connections: (ConnectionRef | ConnectionResolved<Macro>)[];
+
+	versions: Macro[];
 }

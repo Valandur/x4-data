@@ -56,8 +56,8 @@ if (cache) {
 	for (const tFileName of tFileNames) {
 		const tObj = parser.parse(await readFile(tFileName));
 		const id = tObj.language.id;
-		const shortCode = KNOWN_LANGS[id] || id;
-		const name = rawLangs.find((l) => l.id === id)?.name || id;
+		const shortCode = KNOWN_LANGS[id] ?? id;
+		const name = rawLangs.find((l) => l.id === id)?.name ?? id;
 		languages.set(shortCode, name);
 
 		const ts: Map<string, string> = new Map();
@@ -87,8 +87,8 @@ logger.info(`Loaded ${languages.size} languages`);
 export const LANGUAGES = [...languages.entries()].map(([key, name]) => ({ key, name }));
 
 export function t(key: string, lang: string): string;
-export function t<T>(obj: T, lang: string): T;
-export function t<T>(keyOrObj: string | T, lang: string): string | T | object {
+export function t<T>(obj: T, lang: string, depth?: number): T;
+export function t<T>(keyOrObj: string | T, lang: string, depth = 2): string | T | object {
 	if (typeof keyOrObj === 'string') {
 		return keyOrObj
 			.replaceAll(REGEX_DEFAULT, '')
@@ -103,16 +103,23 @@ export function t<T>(keyOrObj: string | T, lang: string): string | T | object {
 			})
 			.replaceAll('\\(', '(')
 			.replaceAll('\\)', ')');
-	} else if (typeof keyOrObj === 'undefined') {
-		return {};
+	} else if (Array.isArray(keyOrObj)) {
+		const clone = [...keyOrObj];
+		for (let i = 0; i < clone.length; i++) {
+			if (typeof clone[i] === 'string') {
+				clone[i] = t(clone[i], lang);
+			} else if (typeof clone[i] === 'object' && clone[i] !== null && depth > 0) {
+				clone[i] = t(clone[i], lang, depth - 1);
+			}
+		}
+		return clone;
 	} else {
 		const clone = { ...keyOrObj };
 		for (const key in clone) {
-			const value = clone[key];
-			if (typeof value === 'string') {
-				(clone[key] as string) = t(value as string, lang);
-			} else if (typeof value === 'object' && value !== null) {
-				(clone[key] as object) = t(value as object, lang);
+			if (typeof clone[key] === 'string') {
+				clone[key] = t(clone[key], lang);
+			} else if (typeof clone[key] === 'object' && clone[key] !== null && depth > 0) {
+				clone[key] = t(clone[key], lang, depth - 1);
 			}
 		}
 		return clone;

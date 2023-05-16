@@ -2,11 +2,8 @@ import { redirect } from '@sveltejs/kit';
 
 import { getMacrosOfType } from '$lib/server/macro';
 import { t } from '$lib/server/translation';
-import type { Macro } from '$lib/models/Macro';
 
 import type { PageServerLoad } from './$types';
-
-const EXCLUDED_PROPS = ['name', 'class', 'alias', 'source'];
 
 export const load: PageServerLoad = async ({ params, parent }) => {
 	const type = params.type;
@@ -26,11 +23,10 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 
 	macro = t(macro, lang);
 
-	const props = Object.keys(macro).filter((p) => !EXCLUDED_PROPS.includes(p)) as (keyof Macro)[];
-
 	return {
+		lang,
 		type,
-		props,
-		macro
+		macro,
+		connections: macro.connections
 	};
 };

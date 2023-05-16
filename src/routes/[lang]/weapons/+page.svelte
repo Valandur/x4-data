@@ -25,24 +25,25 @@
 		</thead>
 		<tbody>
 			{#each weapons as weapon}
+				{@const props = weapon.properties}
 				<tr>
 					<td>{weapon.class}</td>
-					<td>{weapon.identification.name}</td>
-					<td>{weapon.bullet?.class || '-'}</td>
-					<td>{weapon.ammunition?.tags || '-'} / {weapon.ammunition?.value || '-'}</td>
-					{#if weapon.reload}
-						<td>{weapon.reload?.rate} / {weapon.reload?.time}</td>
-					{:else if weapon.heat}
+					<td>{props.identification.name}</td>
+					<td>{props.bullet?.class ?? '-'}</td>
+					<td>{props.ammunition?.tags ?? '-'} / {props.ammunition?.value ?? '-'}</td>
+					{#if props.reload}
+						<td>{props.reload?.rate} / {props.reload?.time}</td>
+					{:else if props.heat}
 						<td>
-							{weapon.heat?.overheat} / {weapon.heat?.coolrate} /
-							{weapon.heat?.cooldelay} / {weapon.heat?.reenable}
+							{props.heat?.overheat} / {props.heat?.coolrate} /
+							{props.heat?.cooldelay} / {props.heat?.reenable}
 						</td>
 					{:else}
 						<td>-</td>
 					{/if}
-					<td>{weapon.rotationspeed?.max || '-'}</td>
-					<td>{weapon.storage?.unit || '-'}</td>
-					<td>{weapon.hull?.max || '-'}</td>
+					<td>{props.rotationspeed?.max ?? '-'}</td>
+					<td>{props.storage?.unit ?? '-'}</td>
+					<td>{props.hull?.max ?? '-'}</td>
 				</tr>
 			{/each}
 		</tbody>

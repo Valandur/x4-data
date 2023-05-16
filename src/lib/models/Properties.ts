@@ -1,3 +1,28 @@
+export interface Properties {
+	ammunition?: PropertyAmmunition;
+	bullet?: PropertyBullet | PropertyRef;
+	cargo?: PropertyCargo;
+	damage?: PropertyDamage;
+	dock?: PropertyDock;
+	docksize?: PropertyDockSize;
+	explosiondamage?: PropertyExplosionDamage;
+	heat?: PropertyHeat;
+	hull?: PropertyHull;
+	identification?: PropertyIdentification;
+	missle?: PropertyMissle;
+	people?: PropertyPeople;
+	purpose?: PropertyPurpose;
+	reload?: PropertyReload;
+	rotationacceleration?: PropertyRotationAcceleration;
+	rotationspeed?: PropertyRotationSpeed;
+	ship?: PropertyShip;
+	software?: PropertySoftware;
+	storage?: PropertyStorage;
+	thruster?: PropertyThruster;
+	undock?: PropertyUndock;
+	weapon?: PropertyWeapon;
+}
+
 export interface PropertyAmmunition {
 	tags: string;
 	value: number;
@@ -18,9 +43,26 @@ export interface PropertyBullet {
 	attach: number;
 }
 
+export interface PropertyCargo {
+	max: number;
+	tags: string;
+}
+
 export interface PropertyDamage {
 	value: number;
 	repair: number;
+}
+
+export interface PropertyDock {
+	external: number;
+	storage?: number;
+	capacity?: number;
+	allow?: number;
+	uselandinggear?: number;
+}
+
+export interface PropertyDockSize {
+	tags: string;
 }
 
 export interface PropertyExplosionDamage {
@@ -100,6 +142,13 @@ export interface PropertyStorage {
 
 export interface PropertyThruster {
 	tags: string;
+}
+
+export interface PropertyUndock {
+	rotate: number;
+	speed: number;
+	distance: number;
+	allow: number;
 }
 
 export interface PropertyWeapon {
