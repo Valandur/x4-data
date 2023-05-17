@@ -7,7 +7,7 @@
 	export let data: LayoutData;
 	$: lang = data.lang;
 	$: langs = data.languages;
-	$: pathAndSearch = $page.url.pathname.substring(3) + (browser ? $page.url.search : '');
+	$: pathAndSearch = $page.url.pathname.replace(`/${lang}`, '') + (browser ? $page.url.search : '');
 </script>
 
 <header id="header" class="app-header">
@@ -49,7 +49,7 @@
 		</div>
 
 		<div class="menu">
-			<div class="menu-item dropdown">
+			<!--<div class="menu-item dropdown">
 				<button
 					data-toggle-class="app-header-menu-search-toggled"
 					data-toggle-target=".app"
@@ -57,7 +57,7 @@
 				>
 					<div class="menu-icon"><i class="bi bi-search nav-icon" /></div>
 				</button>
-			</div>
+			</div>-->
 			<div class="menu-item dropdown">
 				<div class="menu-item dropdown dropdown-mobile-full">
 					<button data-bs-toggle="dropdown" data-bs-display="static" class="btn menu-link">
@@ -74,7 +74,7 @@
 			</div>
 		</div>
 
-		<form class="menu-search" method="POST" name="header_search_form">
+		<!--<form class="menu-search" method="POST" name="header_search_form">
 			<div class="menu-search-container">
 				<div class="menu-search-icon"><i class="bi bi-search" /></div>
 				<div class="menu-search-input">
@@ -90,7 +90,7 @@
 					</button>
 				</div>
 			</div>
-		</form>
+		</form>-->
 	</div>
 </header>
 
