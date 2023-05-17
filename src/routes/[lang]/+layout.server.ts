@@ -18,5 +18,3 @@ export const load: LayoutServerLoad = ({ params }) => {
 		languages: LANGUAGES
 	};
 };
-
-export const prerender = true;
