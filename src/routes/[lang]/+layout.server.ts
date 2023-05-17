@@ -1,5 +1,6 @@
-import { LANGUAGES } from '$lib/server/translation';
 import { redirect } from '@sveltejs/kit';
+
+import { LANGUAGES } from '$lib/server/translation';
 
 import type { LayoutServerLoad } from './$types';
 

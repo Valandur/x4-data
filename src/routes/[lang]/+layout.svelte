@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 
 	import type { LayoutData } from './$types';
@@ -6,7 +7,7 @@
 	export let data: LayoutData;
 	$: lang = data.lang;
 	$: langs = data.languages;
-	$: pathAndSearch = $page.url.pathname.substring(3) + $page.url.search;
+	$: pathAndSearch = $page.url.pathname.substring(3) + (browser ? $page.url.search : '');
 </script>
 
 <header id="header" class="app-header">
