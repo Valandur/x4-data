@@ -3,7 +3,7 @@ import { redirect } from '@sveltejs/kit';
 
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = ({ url, params }) => {
+export const load: LayoutServerLoad = ({ params }) => {
 	const lang = params.lang;
 	const langName = LANGUAGES.find((l) => l.key === lang)?.name ?? null;
 
@@ -14,8 +14,7 @@ export const load: LayoutServerLoad = ({ url, params }) => {
 	return {
 		lang,
 		langName,
-		languages: LANGUAGES,
-		path: url.pathname.substring(3)
+		languages: LANGUAGES
 	};
 };
 

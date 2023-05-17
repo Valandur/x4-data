@@ -1,5 +1,4 @@
 import { getMacrosOfType } from '$lib/server/macro';
-import { SIZES } from '$lib/models/Size';
 import { t } from '$lib/server/translation';
 import type { Macro } from '$lib/models/Macro';
 import type { Ship } from '$lib/models/Ship';
@@ -24,8 +23,6 @@ export const load: PageServerLoad = async ({ parent }) => {
 			docks: getDocks(s)
 		}));
 
-	const sizes = SIZES;
-
 	const roles = ships
 		.map((s) => s.properties.ship.type)
 		.filter((r, i, arr) => arr.indexOf(r) === i)
@@ -36,16 +33,9 @@ export const load: PageServerLoad = async ({ parent }) => {
 		.filter((r, i, arr) => arr.indexOf(r) === i)
 		.sort((a, b) => a.localeCompare(b));
 
-	const cargoTypes = ships
-		.flatMap((s) => Object.keys(s.cargo))
-		.filter((r, i, arr) => arr.indexOf(r) === i)
-		.sort((a, b) => a.localeCompare(b));
-
 	return {
 		roles,
 		purposes,
-		sizes,
-		cargoTypes,
 		ships
 	};
 };
@@ -107,7 +97,7 @@ function getCargo(macro: Macro) {
 		}
 
 		const macro = conn.resolved;
-		const types = macro.properties.cargo?.tags.split(' ');
+		const types = macro.properties.cargo?.tags.toUpperCase().split(' ');
 		if (types) {
 			for (const type of types) {
 				cargo[type] = (cargo[type] ?? 0) + (macro.properties.cargo?.max ?? 0);

@@ -6,7 +6,7 @@
 	export let data: LayoutData;
 	$: lang = data.lang;
 	$: langs = data.languages;
-	$: path = data.path;
+	$: pathAndSearch = $page.url.pathname.substring(3) + $page.url.search;
 </script>
 
 <header id="header" class="app-header">
@@ -64,7 +64,7 @@
 					</button>
 					<div class="dropdown-menu dropdown-menu-end me-lg-3 fs-11px mt-1">
 						{#each langs as lang}
-							<a class="dropdown-item d-flex align-items-center" href="/{lang.key}{path}">
+							<a class="dropdown-item d-flex align-items-center" href="/{lang.key}{pathAndSearch}">
 								{lang.name}
 							</a>
 						{/each}
