@@ -4,12 +4,14 @@ import { getMacrosOfType } from '$lib/server/macro';
 
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, parent }) => {
 	const type = params.type;
 
 	const macros = getMacrosOfType(type);
+
+	const { lang } = await parent();
 	if (!macros.length) {
-		throw redirect(307, '/macros');
+		throw redirect(307, `/${lang}/macros`);
 	}
 
 	return {

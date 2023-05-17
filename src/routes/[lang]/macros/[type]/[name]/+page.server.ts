@@ -10,16 +10,16 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 	const name = params.name;
 
 	const macros = getMacrosOfType(type);
-	if (!macros.length) {
-		throw redirect(307, '/macros');
-	}
-
 	let macro = macros.find((o) => o.name === name);
-	if (!macro) {
-		throw redirect(307, `/macros/${type}`);
-	}
 
 	const { lang } = await parent();
+
+	if (!macros.length) {
+		throw redirect(307, `/${lang}/macros`);
+	}
+	if (!macro) {
+		throw redirect(307, `/${lang}/macros/${type}`);
+	}
 
 	macro = t(macro, lang);
 
