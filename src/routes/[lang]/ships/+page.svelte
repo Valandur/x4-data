@@ -6,6 +6,7 @@
 	import { page } from '$app/stores';
 
 	import { CARGO_TYPES, SIZES } from '$lib/models/Constants';
+	import SortButton from '$lib/components/SortButton.svelte';
 
 	import type { PageData } from './$types';
 
@@ -258,43 +259,19 @@
 			<tr>
 				<th class="text-nowrap">
 					<span>Size</span>
-					<button
-						type="button"
-						class="btn btn-sm btn-secondary ms-2"
-						on:click={() => onOrderBy(`size`)}
-					>
-						<i class="fa-solid {sortIcon(`size`)}" />
-					</button>
+					<SortButton bind:orderBy prop="size" />
 				</th>
 				<th class="text-nowrap">
 					<span>Role</span>
-					<button
-						type="button"
-						class="btn btn-sm btn-secondary ms-2"
-						on:click={() => onOrderBy(`properties.ship.type`)}
-					>
-						<i class="fa-solid {sortIcon(`properties.ship.type`)}" />
-					</button>
+					<SortButton bind:orderBy prop="properties.ship.type" />
 				</th>
 				<th class="text-nowrap">
 					<span>Purpose</span>
-					<button
-						type="button"
-						class="btn btn-sm btn-secondary ms-2"
-						on:click={() => onOrderBy(`properties.purpose.primary`)}
-					>
-						<i class="fa-solid {sortIcon(`properties.purpose.primary`)}" />
-					</button>
+					<SortButton bind:orderBy prop="properties.purpose.primary" />
 				</th>
 				<th class="text-nowrap">
 					<span>Name</span>
-					<button
-						type="button"
-						class="btn btn-sm btn-secondary ms-2"
-						on:click={() => onOrderBy(`properties.identification.name`)}
-					>
-						<i class="fa-solid {sortIcon(`properties.identification.name`)}" />
-					</button>
+					<SortButton bind:orderBy prop="properties.identification.name" />
 				</th>
 				<th colSpan={cargoIsCompact ? 1 : CARGO_TYPES.length} class="text-nowrap">
 					<span>Cargo</span>
@@ -304,23 +281,11 @@
 				</th>
 				<th class="text-nowrap">
 					<span>Crew</span>
-					<button
-						type="button"
-						class="btn btn-sm btn-secondary ms-2"
-						on:click={() => onOrderBy('properties.people.capacity')}
-					>
-						<i class="fa-solid {sortIcon('properties.people.capacity')}" />
-					</button>
+					<SortButton bind:orderBy prop="properties.people.capacity" />
 				</th>
 				<th class="text-nowrap">
 					<span>Hull</span>
-					<button
-						type="button"
-						class="btn btn-sm btn-secondary ms-2"
-						on:click={() => onOrderBy('properties.hull.max')}
-					>
-						<i class="fa-solid {sortIcon('properties.hull.max')}" />
-					</button>
+					<SortButton bind:orderBy prop="properties.hull.max" />
 				</th>
 				<th colSpan={docksIsCompact ? 1 : SIZES.length} class="text-nowrap">
 					<span>Docks</span>
@@ -344,13 +309,7 @@
 						{#each CARGO_TYPES as type}
 							<th class="text-nowrap">
 								<span>{type}</span>
-								<button
-									type="button"
-									class="btn btn-sm btn-secondary ms-2"
-									on:click={() => onOrderBy(`cargo.${type}`)}
-								>
-									<i class="fa-solid {sortIcon(`cargo.${type}`)}" />
-								</button>
+								<SortButton bind:orderBy prop="cargo.{type}" />
 							</th>
 						{/each}
 					{/if}
@@ -361,13 +320,7 @@
 						{#each SIZES as size}
 							<th class="text-nowrap">
 								<span>{size}</span>
-								<button
-									type="button"
-									class="btn btn-sm btn-secondary ms-2"
-									on:click={() => onOrderBy(`docks.${size}.external`)}
-								>
-									<i class="fa-solid {sortIcon(`docks.${size}.external`)}" />
-								</button>
+								<SortButton bind:orderBy prop="docks.{size}.external" />
 							</th>
 						{/each}
 					{/if}
@@ -377,13 +330,7 @@
 						{#each SIZES as size}
 							<th class="text-nowrap">
 								<span>{size}</span>
-								<button
-									type="button"
-									class="btn btn-sm btn-secondary ms-2"
-									on:click={() => onOrderBy(`docks.${size}.storage`)}
-								>
-									<i class="fa-solid {sortIcon(`docks.${size}.storage`)}" />
-								</button>
+								<SortButton bind:orderBy prop="docks.{size}.storage" />
 							</th>
 						{/each}
 					{/if}
