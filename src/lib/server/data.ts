@@ -25,8 +25,8 @@ const parser = new XMLParser({
 const macros: Map<string, Macro> = new Map();
 const macrosByClass: Map<string, Macro[]> = new Map();
 
-const components: Map<string, Component> = new Map();
-const componentsByClass: Map<string, Component[]> = new Map();
+const comps: Map<string, Component> = new Map();
+const compsByClass: Map<string, Component[]> = new Map();
 
 logger.debug('Loading...');
 
@@ -36,11 +36,11 @@ const cache = await readFile(CACHE_DATA, 'utf-8')
 
 if (cache) {
 	for (const cachedComponent of cache.components) {
-		componentsByClass.set(
+		compsByClass.set(
 			cachedComponent.class,
-			(componentsByClass.get(cachedComponent.class) || []).concat(cachedComponent)
+			(compsByClass.get(cachedComponent.class) || []).concat(cachedComponent)
 		);
-		components.set(cachedComponent.name, cachedComponent);
+		comps.set(cachedComponent.name, cachedComponent);
 	}
 	logger.debug('Restored components from cache');
 
@@ -77,7 +77,7 @@ if (cache) {
 			}
 
 			for (const xmlMacro of xmlMacros) {
-				const macro = loadMacro(xmlFileName, xmlMacro);
+				const macro = loadMacro(xmlFileName.substring(OUT_DIR.length), xmlMacro);
 				const other = macros.get(macro.name);
 				if (other) {
 					logger.warn(`Duplicate macro`, chalk.magenta(macro.name), macro.xmlSourceFile);
@@ -96,21 +96,14 @@ if (cache) {
 			}
 
 			for (const xmlComponent of xmlComponents) {
-				const component = loadComponent(xmlFileName, xmlComponent);
-				const other = components.get(component.name);
+				const comp = loadComponent(xmlFileName.substring(OUT_DIR.length), xmlComponent);
+				const other = comps.get(comp.name);
 				if (other) {
-					logger.warn(
-						`Duplicate component`,
-						chalk.magenta(component.name),
-						component.xmlSourceFile
-					);
-					other.duplicates.push(component);
+					logger.warn(`Duplicate component`, chalk.magenta(comp.name), comp.xmlSourceFile);
+					other.duplicates.push(comp);
 				} else {
-					components.set(component.name, component);
-					componentsByClass.set(
-						component.class,
-						(componentsByClass.get(component.class) ?? []).concat(component)
-					);
+					comps.set(comp.name, comp);
+					compsByClass.set(comp.class, (compsByClass.get(comp.class) ?? []).concat(comp));
 				}
 			}
 		}
@@ -119,13 +112,13 @@ if (cache) {
 	await mkdir(dirname(CACHE_DATA), { recursive: true });
 	await writeFile(
 		CACHE_DATA,
-		JSON.stringify({ macros: [...macros.values()], components: [...components.values()] })
+		JSON.stringify({ macros: [...macros.values()], components: [...comps.values()] })
 	);
 }
 
 for (const macro of macros.values()) {
 	if (macro.component && 'ref' in macro.component) {
-		const component = components.get(macro.component.ref);
+		const component = comps.get(macro.component.ref);
 		if (component) {
 			macro.component = component;
 		} else {
@@ -151,7 +144,7 @@ for (const macro of macros.values()) {
 	}
 }
 
-logger.info(`Loaded ${components.size} components in ${componentsByClass.size} classes`);
+logger.info(`Loaded ${comps.size} components in ${compsByClass.size} classes`);
 logger.info(`Loaded ${macros.size} macros in ${macrosByClass.size} classes`);
 
 export const MACRO_TYPES = [...macrosByClass.entries()].map(([name, macros]) => ({
@@ -163,13 +156,13 @@ export function getMacrosOfType<T extends Macro = Macro>(...types: string[]): T[
 	return types.flatMap((type) => macrosByClass.get(type) ?? []) as T[];
 }
 
-export const COMPONENT_TYPES = [...componentsByClass.entries()].map(([name, comps]) => ({
+export const COMPONENT_TYPES = [...compsByClass.entries()].map(([name, comps]) => ({
 	name,
 	count: comps.length
 }));
 
 export function getComponentsOfType<T extends Component = Component>(...types: string[]): T[] {
-	return types.flatMap((type) => componentsByClass.get(type) ?? []) as T[];
+	return types.flatMap((type) => compsByClass.get(type) ?? []) as T[];
 }
 
 function loadComponent(xmlFileName: string, xmlComponent: any): Component {

@@ -1,10 +1,10 @@
 import { getMacrosOfType } from '$lib/server/data';
+import { Size } from '$lib/models/Constants';
 import { t } from '$lib/server/translation';
 import type { Macro } from '$lib/models/Macro';
 import type { Ship } from '$lib/models/Ship';
 
 import type { PageServerLoad } from './$types';
-
 export const load: PageServerLoad = async ({ parent }) => {
 	const rawShips = getMacrosOfType<Ship>('ship_xs', 'ship_s', 'ship_m', 'ship_l', 'ship_xl');
 
@@ -20,7 +20,11 @@ export const load: PageServerLoad = async ({ parent }) => {
 			...t(s, lang),
 			size: classToSize(s.class),
 			cargo: getCargo(s),
-			docks: getDocks(s)
+			docks: getDocks(s),
+			engines: getEngines(s),
+			shields: getShields(s),
+			weapons: getWeapons(s),
+			turrets: getTurrets(s)
 		}));
 
 	const roles = ships
@@ -46,6 +50,7 @@ function classToSize(clazz: string) {
 
 function getDocks(macro: Macro) {
 	const docks: Record<string, { external: number; storage: number }> = {};
+
 	for (const conn of macro.connections) {
 		if (!('resolved' in conn) || !conn.resolved) {
 			continue;
@@ -86,11 +91,13 @@ function getDocks(macro: Macro) {
 			stats.storage += subStats.storage;
 		}
 	}
+
 	return docks;
 }
 
 function getCargo(macro: Macro) {
 	const cargo: Record<string, number> = {};
+
 	for (const conn of macro.connections) {
 		if (!('resolved' in conn) || !conn.resolved) {
 			continue;
@@ -109,5 +116,180 @@ function getCargo(macro: Macro) {
 			cargo[type] = (cargo[type] ?? 0) + amount;
 		}
 	}
+
 	return cargo;
+}
+
+function getEngines(macro: Macro) {
+	if (!macro.component || 'ref' in macro.component) {
+		return {};
+	}
+
+	const engines: Record<string, { total: number; type: string }> = {};
+
+	const engineTagList = macro.component.connections
+		.filter((conn) => conn.tags?.includes('engine'))
+		.map((c) => c.tags?.split(' ') ?? []);
+
+	for (const engineTags of engineTagList) {
+		let size = Size.XS;
+		let type = 'standard';
+
+		for (const tag of engineTags) {
+			if (!tag || tag === 'engine') {
+				continue;
+			}
+
+			const sizeTag = tagToSize(tag);
+			if (sizeTag) {
+				size = sizeTag;
+				continue;
+			}
+
+			const typeTag = tagToType(tag);
+			if (typeTag) {
+				type = typeTag;
+				continue;
+			}
+		}
+
+		engines[size] = { total: (engines[size]?.total ?? 0) + 1, type };
+	}
+
+	return engines;
+}
+
+function getShields(macro: Macro) {
+	if (!macro.component || 'ref' in macro.component) {
+		return {};
+	}
+
+	const shields: Record<string, { total: number; type: string }> = {};
+
+	const shieldTagList = macro.component.connections
+		.filter((conn) => conn.tags?.includes('shield'))
+		.map((c) => c.tags?.split(' ') ?? []);
+
+	for (const shieldTags of shieldTagList) {
+		let size = Size.XS;
+		let type = 'standard';
+
+		for (const tag of shieldTags) {
+			if (!tag || tag === 'shield') {
+				continue;
+			}
+
+			const sizeTag = tagToSize(tag);
+			if (sizeTag) {
+				size = sizeTag;
+				continue;
+			}
+
+			const typeTag = tagToType(tag);
+			if (typeTag) {
+				type = typeTag;
+				continue;
+			}
+		}
+
+		shields[size] = { total: (shields[size]?.total ?? 0) + 1, type };
+	}
+
+	return shields;
+}
+
+function getTurrets(macro: Macro) {
+	if (!macro.component || 'ref' in macro.component) {
+		return {};
+	}
+
+	const turrets: Record<string, { total: number; type: string }> = {};
+
+	const turretTagList = macro.component.connections
+		.filter((conn) => conn.tags?.includes('turret'))
+		.map((c) => c.tags?.split(' ') ?? []);
+
+	for (const turretTags of turretTagList) {
+		let size = Size.XS;
+		let type = 'standard';
+
+		for (const tag of turretTags) {
+			if (!tag || tag === 'turret') {
+				continue;
+			}
+
+			const sizeTag = tagToSize(tag);
+			if (sizeTag) {
+				size = sizeTag;
+				continue;
+			}
+
+			const typeTag = tagToType(tag);
+			if (typeTag) {
+				type = typeTag;
+				continue;
+			}
+		}
+
+		turrets[size] = { total: (turrets[size]?.total ?? 0) + 1, type };
+	}
+
+	return turrets;
+}
+
+function getWeapons(macro: Macro) {
+	if (!macro.component || 'ref' in macro.component) {
+		return {};
+	}
+
+	const weapons: Record<string, { total: number; type: string }> = {};
+
+	const weaponTagList = macro.component.connections
+		.filter((conn) => conn.tags?.includes('weapon'))
+		.map((c) => c.tags?.split(' ') ?? []);
+
+	for (const weaponTags of weaponTagList) {
+		let size = Size.XS;
+		let type = 'standard';
+
+		for (const tag of weaponTags) {
+			if (!tag || tag === 'weapon') {
+				continue;
+			}
+
+			const sizeTag = tagToSize(tag);
+			if (sizeTag) {
+				size = sizeTag;
+				continue;
+			}
+
+			const typeTag = tagToType(tag);
+			if (typeTag) {
+				type = typeTag;
+				continue;
+			}
+		}
+
+		weapons[size] = { total: (weapons[size]?.total ?? 0) + 1, type };
+	}
+
+	return weapons;
+}
+
+function tagToSize(tag: string) {
+	return tag === 'extralarge'
+		? Size.XL
+		: tag === 'large'
+		? Size.L
+		: tag === 'medium'
+		? Size.M
+		: tag === 'small'
+		? Size.S
+		: tag === 'extrasmall'
+		? Size.XS
+		: null;
+}
+
+function tagToType(tag: string) {
+	return tag === 'standard' ? 'standard' : tag === 'boron' ? 'boron' : null;
 }
