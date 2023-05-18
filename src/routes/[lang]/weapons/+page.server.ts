@@ -1,4 +1,4 @@
-import { getMacrosOfType } from '$lib/server/macro';
+import { getMacrosOfType } from '$lib/server/data';
 import { t } from '$lib/server/translation';
 import type { Weapon } from '$lib/models/Weapon';
 

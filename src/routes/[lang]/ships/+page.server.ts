@@ -1,4 +1,4 @@
-import { getMacrosOfType } from '$lib/server/macro';
+import { getMacrosOfType } from '$lib/server/data';
 import { t } from '$lib/server/translation';
 import type { Macro } from '$lib/models/Macro';
 import type { Ship } from '$lib/models/Ship';

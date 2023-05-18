@@ -1,4 +1,4 @@
-import { MACRO_TYPES } from '$lib/server/macro';
+import { MACRO_TYPES } from '$lib/server/data';
 
 import type { PageServerLoad } from './$types';
 

@@ -2,7 +2,7 @@
 	export let title: string;
 	export let name: string;
 	export let link: string | null;
-	export let extras: Record<string, string>;
+	export let extras: object = {};
 </script>
 
 <div class="card mb-4">

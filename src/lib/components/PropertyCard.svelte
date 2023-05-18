@@ -2,11 +2,21 @@
 	export let title: string;
 	export let property: any;
 
+	let open: string[] = [];
+
 	$: entries = Object.entries(property ?? {});
 	$: simples = entries.filter(([_, value]) => typeof value !== 'object');
 	$: complex = entries.filter(
 		([_, value]) => typeof value === 'object' && value !== null && Object.keys(value).length > 0
 	) as [string, object][];
+
+	function toggleOpen(key: string, newOpen: boolean) {
+		if (newOpen) {
+			open = open.concat(key);
+		} else {
+			open = open.filter((o) => o !== key);
+		}
+	}
 </script>
 
 <div class="card mb-4">
@@ -30,33 +40,44 @@
 	{#if complex.length > 0}
 		<ul class="list-group list-group-flush">
 			<!-- needed for the horizontal line -->
-			<li class="list-group-item m-0 p-0" />
+			<li class="list-group-item p-0" />
 
 			{#each complex as [key, value]}
-				<div class="card-header fw-bold small">
-					<i class="fa-solid fa-caret-down me-2" />
-					{key}
-				</div>
-				<li class="list-group-item">
-					<table class="table table-borderless table-hover m-0">
-						<tbody>
-							{#each Object.entries(value) as [subKey, subValue]}
-								<tr>
-									<td>{subKey}</td>
-									{#if typeof subValue !== 'object'}
-										<td>{subValue}</td>
-									{:else}
-										<td>
-											<pre class="bg-transparent text-white border-0 m-0 p-0"><code
-													>{JSON.stringify(subValue, null, 2)}</code
-												></pre>
-										</td>
-									{/if}
-								</tr>
-							{/each}
-						</tbody>
-					</table>
+				{@const isOpen = open.includes(key)}
+				<li class="list-group-item d-flex flex-row p-0">
+					<button
+						type="button"
+						class="btn flex-fill card-header fw-bold text-start"
+						on:click={() => toggleOpen(key, !isOpen)}
+					>
+						<i class="fa-solid fa-caret-{isOpen ? 'down' : 'right'} me-2" />
+						{key}
+					</button>
 				</li>
+				{#if isOpen}
+					<li class="list-group-item overflow-hidden">
+						<div class="table-responsive">
+							<table class="table table-borderless table-hover m-0">
+								<tbody>
+									{#each Object.entries(value) as [subKey, subValue]}
+										<tr>
+											<td>{subKey}</td>
+											{#if typeof subValue !== 'object'}
+												<td>{subValue}</td>
+											{:else}
+												<td>
+													<pre class="bg-transparent text-white border-0 m-0 p-0"><code
+															>{JSON.stringify(subValue, null, 2)}</code
+														></pre>
+												</td>
+											{/if}
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					</li>
+				{/if}
 			{/each}
 		</ul>
 	{/if}

@@ -2,7 +2,7 @@ import { dirname } from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { XMLParser } from 'fast-xml-parser';
 
-import { getAllXmlFilesInDir } from './util';
+import { getAllFilesInDir } from './util';
 import { Logger } from './logger';
 
 const CACHE = '.cache/translation';
@@ -52,7 +52,7 @@ if (cache) {
 
 	logger.debug(`Found ${rawLangs.length} supported languages`);
 
-	const tFileNames = await getAllXmlFilesInDir(logger, 'dump/t');
+	const tFileNames = await getAllFilesInDir(logger, 'dump/out/t', '.xml');
 	for (const tFileName of tFileNames) {
 		const tObj = parser.parse(await readFile(tFileName));
 		const id = tObj.language.id;

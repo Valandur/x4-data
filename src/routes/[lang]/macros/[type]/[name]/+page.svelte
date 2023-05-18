@@ -10,7 +10,7 @@
 	$: macro = data.macro;
 	$: props = Object.keys(macro.properties) as (keyof Macro['properties'])[];
 	$: conns = macro.connections || [];
-	$: versions = macro.versions;
+	$: duplicates = macro.duplicates;
 </script>
 
 <ol class="breadcrumb">
@@ -20,7 +20,7 @@
 </ol>
 
 <h1>{macro.name}</h1>
-<div class="mb-4">{macro.source}</div>
+<div class="mb-4">{macro.xmlSourceFile}</div>
 
 <div class="container-flex">
 	{#if macro.component}
@@ -29,7 +29,15 @@
 		</div>
 		<div class="row">
 			<div class="col">
-				<PropertyCard title="component" property={macro.component} />
+				{#if 'ref' in macro.component}
+					<PropertyCard title="component" property={macro.component} />
+				{:else}
+					<ConnectionCard
+						title="component"
+						name={macro.component.name}
+						link={`/${lang}/components/${macro.component.class}/${macro.component.name}`}
+					/>
+				{/if}
 			</div>
 		</div>
 	{/if}
@@ -40,7 +48,7 @@
 		</div>
 		<div class="row">
 			{#each props as prop}
-				<div class="col" class:col-4={prop === 'identification'}>
+				<div class="col-4">
 					<PropertyCard title={prop} property={macro.properties[prop]} />
 				</div>
 			{/each}
@@ -53,7 +61,7 @@
 		</div>
 		<div class="row">
 			{#each conns as conn}
-				<div class="col">
+				<div class="col-4">
 					<ConnectionCard
 						title={conn.ref}
 						name={conn.macro?.ref || '-'}
@@ -67,21 +75,14 @@
 		</div>
 	{/if}
 
-	{#if versions.length > 0}
+	{#if duplicates.length > 0}
 		<div class="row mb-2">
-			<h2>Versions</h2>
+			<h2>Duplicates</h2>
 		</div>
 		<div class="row">
-			{#each versions as version}
-				<div class="col">
-					<PropertyCard
-						title={version.source}
-						property={{
-							component: version.component,
-							properties: version.properties,
-							connections: version.connections
-						}}
-					/>
+			{#each duplicates as { xmlSourceFile, ...duplicate }}
+				<div class="col-12">
+					<PropertyCard title={xmlSourceFile} property={duplicate} />
 				</div>
 			{/each}
 		</div>

@@ -1,21 +1,21 @@
 import { redirect } from '@sveltejs/kit';
 
-import { getMacrosOfType } from '$lib/server/data';
+import { getComponentsOfType } from '$lib/server/data';
 
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, parent }) => {
 	const type = params.type;
 
-	const macros = getMacrosOfType(type);
+	const components = getComponentsOfType(type);
 
 	const { lang } = await parent();
-	if (!macros.length) {
-		throw redirect(307, `/${lang}/macros`);
+	if (!components.length) {
+		throw redirect(307, `/${lang}/components`);
 	}
 
 	return {
 		type,
-		macros
+		components
 	};
 };

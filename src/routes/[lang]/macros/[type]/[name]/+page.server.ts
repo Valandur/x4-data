@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 
-import { getMacrosOfType } from '$lib/server/macro';
+import { getMacrosOfType } from '$lib/server/data';
 import { t } from '$lib/server/translation';
 
 import type { PageServerLoad } from './$types';
@@ -26,7 +26,6 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 	return {
 		lang,
 		type,
-		macro,
-		connections: macro.connections
+		macro
 	};
 };

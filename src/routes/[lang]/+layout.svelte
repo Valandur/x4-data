@@ -121,6 +121,13 @@
 					</a>
 				</div>
 
+				<div class="menu-item" class:active={$page.url.pathname.startsWith(`/${lang}/components`)}>
+					<a href="/{lang}/components" class="menu-link">
+						<span class="menu-icon"><i class="fa-solid fa-object-ungroup" /></span>
+						<span class="menu-text">Components</span>
+					</a>
+				</div>
+
 				<div class="menu-item" class:active={$page.url.pathname.startsWith(`/${lang}/macros`)}>
 					<a href="/{lang}/macros" class="menu-link">
 						<span class="menu-icon"><i class="fa-solid fa-microchip" /></span>

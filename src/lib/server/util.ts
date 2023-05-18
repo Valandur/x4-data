@@ -1,21 +1,21 @@
+import { differenceInSeconds } from 'date-fns';
 import { readdir, stat } from 'node:fs/promises';
+import chalk from 'chalk';
 
 import type { Logger } from './logger';
-import { differenceInSeconds } from 'date-fns';
 
-export async function getAllXmlFilesInDir(logger: Logger, dir: string, part?: string) {
+export async function getAllFilesInDir(logger: Logger, dir: string, ext?: string) {
 	const files: string[] = [];
 	const todo = [dir];
-	const end = `${part ?? ''}.xml`;
 
-	logger.debug(`Searching '${dir}' for files ending in '${end}'`);
+	logger.debug(`Searching ${chalk.magenta(dir)} for files ending in ${chalk.magenta(ext)}`);
 
 	let filesNum = 0;
 	let foldersNum = 0;
 	let lastUpdate = new Date();
 	let next: string | undefined;
 	while ((next = todo.shift())) {
-		if (next.endsWith(end)) {
+		if (!ext || next.endsWith(ext)) {
 			filesNum++;
 			files.push(next);
 		} else if (next.includes('.')) {
@@ -27,7 +27,7 @@ export async function getAllXmlFilesInDir(logger: Logger, dir: string, part?: st
 
 		if (differenceInSeconds(new Date(), lastUpdate) > 2) {
 			logger.debug(
-				`    Found ${files.length} XML files, searched ${filesNum} files in ${foldersNum} folders...`
+				`    Found ${files.length} files, searched ${filesNum} files in ${foldersNum} folders...`
 			);
 			lastUpdate = new Date();
 		}
