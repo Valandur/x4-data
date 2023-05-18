@@ -24,6 +24,12 @@
 	const TURRET_SIZES = [Size.S, Size.M, Size.L];
 	const DOCK_SIZES = [Size.S, Size.M];
 	const HANGER_SIZES = [Size.XS, Size.S, Size.M];
+	const CARGO_NAMES: Record<string, string> = {
+		CONTAINER: 'CT',
+		CONDENSATE: 'CS',
+		LIQUID: 'L',
+		SOLID: 'S'
+	};
 
 	export let data: PageData;
 
@@ -43,19 +49,18 @@
 
 	$: filteredShips = data.ships
 		.filter(
-			(s) =>
-				(!filterText ||
-					s.properties.identification.name.toLocaleLowerCase().includes(filterText)) &&
-				(!filterRoles.length || filterRoles.includes(s.properties.ship.type)) &&
-				(!filterPurposes.length || filterPurposes.includes(s.properties.purpose.primary)) &&
-				(!filterSizes.length || filterSizes.includes(s.size))
+			(ship) =>
+				(!filterText || ship.ident.toLocaleLowerCase().includes(filterText)) &&
+				(!filterRoles.length || filterRoles.includes(ship.type)) &&
+				(!filterPurposes.length || filterPurposes.includes(ship.purpose)) &&
+				(!filterSizes.length || filterSizes.includes(ship.size))
 		)
-		.sort((a, b) => {
+		.sort((shipA, shipB) => {
 			for (const order of orderBy) {
 				const neg = order[0] === '-';
 				const parts = order.substring(neg ? 1 : 0).split('.');
-				let valueA: any = a;
-				let valueB: any = b;
+				let valueA: any = shipA;
+				let valueB: any = shipB;
 				for (const part of parts) {
 					valueA = valueA?.[part];
 					valueB = valueB?.[part];
@@ -77,7 +82,7 @@
 					return comp;
 				}
 			}
-			return a.properties.identification.name.localeCompare(b.properties.identification.name);
+			return shipA.ident.localeCompare(shipB.ident);
 		});
 
 	$: if (browser) {
@@ -272,21 +277,22 @@
 	<table id="table-ships" class="table table-striped table-hover">
 		<thead class="table-light">
 			<tr>
+				<th />
 				<th class="text-nowrap">
 					<span>Size</span>
 					<SortButton bind:orderBy prop="size" />
 				</th>
 				<th class="text-nowrap">
 					<span>Role</span>
-					<SortButton bind:orderBy prop="properties.ship.type" />
+					<SortButton bind:orderBy prop="type" />
 				</th>
 				<th class="text-nowrap">
 					<span>Purpose</span>
-					<SortButton bind:orderBy prop="properties.purpose.primary" />
+					<SortButton bind:orderBy prop="purpose" />
 				</th>
 				<th class="text-nowrap">
 					<span>Name</span>
-					<SortButton bind:orderBy prop="properties.identification.name" />
+					<SortButton bind:orderBy prop="ident" />
 				</th>
 				<th colSpan={engineIsCompact ? 1 : ENGINE_SIZES.length} class="text-nowrap">
 					<span>Engines</span>
@@ -332,23 +338,23 @@
 				</th>
 				<th class="text-nowrap">
 					<span>Crew</span>
-					<SortButton bind:orderBy prop="properties.people.capacity" />
+					<SortButton bind:orderBy prop="crew" />
 				</th>
 				<th class="text-nowrap">
 					<span>Hull</span>
-					<SortButton bind:orderBy prop="properties.hull.max" />
+					<SortButton bind:orderBy prop="hull" />
 				</th>
 			</tr>
 			{#if !engineIsCompact || !shieldIsCompact || !weaponIsCompact || !turretIsCompact || !cargoIsCompact || !docksIsCompact || !hangarIsCompact}
 				<tr>
-					<th colSpan="4" />
+					<th colSpan="5" />
 					{#if engineIsCompact}
 						<th />
 					{:else}
 						{#each ENGINE_SIZES as size}
 							<th class="text-nowrap">
 								<span>{size}</span>
-								<SortButton bind:orderBy prop="engines.{size}.total" />
+								<SortButton bind:orderBy prop="engines.{size}" />
 							</th>
 						{/each}
 					{/if}
@@ -358,7 +364,7 @@
 						{#each SHIELD_SIZES as size}
 							<th class="text-nowrap">
 								<span>{size}</span>
-								<SortButton bind:orderBy prop="shields.{size}.total" />
+								<SortButton bind:orderBy prop="shields.{size}" />
 							</th>
 						{/each}
 					{/if}
@@ -368,7 +374,7 @@
 						{#each WEAPON_SIZES as size}
 							<th class="text-nowrap">
 								<span>{size}</span>
-								<SortButton bind:orderBy prop="weapons.{size}.total" />
+								<SortButton bind:orderBy prop="weapons.{size}" />
 							</th>
 						{/each}
 					{/if}
@@ -378,7 +384,7 @@
 						{#each TURRET_SIZES as size}
 							<th class="text-nowrap">
 								<span>{size}</span>
-								<SortButton bind:orderBy prop="turrets.{size}.total" />
+								<SortButton bind:orderBy prop="turrets.{size}" />
 							</th>
 						{/each}
 					{/if}
@@ -387,7 +393,7 @@
 					{:else}
 						{#each CARGO_TYPES as type}
 							<th class="text-nowrap">
-								<span>{type.substring(0, 1)}{type.substring(3, 4)}</span>
+								<span>{CARGO_NAMES[type]}</span>
 								<SortButton bind:orderBy prop="cargo.{type}" />
 							</th>
 						{/each}
@@ -398,7 +404,7 @@
 						{#each DOCK_SIZES as size}
 							<th class="text-nowrap">
 								<span>{size}</span>
-								<SortButton bind:orderBy prop="docks.{size}.external" />
+								<SortButton bind:orderBy prop="docks.{size}" />
 							</th>
 						{/each}
 					{/if}
@@ -408,7 +414,7 @@
 						{#each HANGER_SIZES as size}
 							<th class="text-nowrap">
 								<span>{size}</span>
-								<SortButton bind:orderBy prop="docks.{size}.storage" />
+								<SortButton bind:orderBy prop="hangars.{size}" />
 							</th>
 						{/each}
 					{/if}
@@ -418,106 +424,77 @@
 		</thead>
 		<tbody>
 			{#each filteredShips as ship}
-				{@const props = ship.properties}
 				<tr>
-					<td>{ship.size}</td>
-					<td>{props.ship.type}</td>
-					<td>{props.purpose.primary}</td>
 					<td>
-						<a href="/{data.lang}/macros/{ship.class}/{ship.name}">{props.identification.name}</a>
+						<img
+							src="https://roguey.co.uk/x4/ships/pics/{ship.size.toLowerCase()}/{ship.name}_l.jpg"
+							referrerpolicy="no-referrer"
+							alt={ship.ident}
+							width="100"
+						/>
+					</td>
+					<td>{ship.size}</td>
+					<td>{ship.type}</td>
+					<td>{ship.purpose}</td>
+					<td>
+						<a href="/{data.lang}/macros/{ship.class}/{ship.name}">{ship.ident}</a>
 					</td>
 					{#if engineIsCompact}
 						<td>
-							{#each Object.entries(ship.engines) as [size, { total, type }]}
-								<span class="badge text-bg-teal me-2">
-									{total}
-									{size}
-									{type !== 'standard' ? type : ''}
-								</span>
+							{#each Object.entries(ship.engines) as [size, total]}
+								<span class="badge text-bg-green me-2">{total} {size}</span>
 							{/each}
 						</td>
 					{:else}
 						{#each ENGINE_SIZES as size}
-							{@const engine = ship.engines[size]}
-							{#if engine}
-								<td class="text-nowrap">
-									{engine.total}
-								</td>
-							{:else}
-								<td>-</td>
-							{/if}
+							<td class="text-nowrap">
+								{ship.engines[size] ?? '-'}
+							</td>
 						{/each}
 					{/if}
 					{#if shieldIsCompact}
 						<td>
-							{#each Object.entries(ship.shields) as [size, { total, type }]}
-								<span class="badge text-bg-pink me-2">
-									{total}
-									{size}
-									{type !== 'standard' ? type : ''}
-								</span>
+							{#each Object.entries(ship.shields) as [size, total]}
+								<span class="badge text-bg-primary me-2">{total} {size}</span>
 							{/each}
 						</td>
 					{:else}
 						{#each SHIELD_SIZES as size}
-							{@const shield = ship.shields[size]}
-							{#if shield}
-								<td class="text-nowrap">
-									{shield.total}
-								</td>
-							{:else}
-								<td>-</td>
-							{/if}
+							<td class="text-nowrap">
+								{ship.shields[size] ?? '-'}
+							</td>
 						{/each}
 					{/if}
 					{#if weaponIsCompact}
 						<td>
-							{#each Object.entries(ship.weapons) as [size, { total, type }]}
-								<span class="badge text-bg-pink me-2">
-									{total}
-									{size}
-									{type !== 'standard' ? type : ''}
-								</span>
+							{#each Object.entries(ship.weapons) as [size, total]}
+								<span class="badge text-bg-red me-2">{total} {size}</span>
 							{/each}
 						</td>
 					{:else}
 						{#each WEAPON_SIZES as size}
-							{@const weapon = ship.weapons[size]}
-							{#if weapon}
-								<td class="text-nowrap">
-									{weapon.total}
-								</td>
-							{:else}
-								<td>-</td>
-							{/if}
+							<td class="text-nowrap">
+								{ship.weapons[size] ?? '-'}
+							</td>
 						{/each}
 					{/if}
 					{#if turretIsCompact}
 						<td>
-							{#each Object.entries(ship.turrets) as [size, { total, type }]}
-								<span class="badge text-bg-pink me-2">
-									{total}
-									{size}
-									{type !== 'standard' ? type : ''}
-								</span>
+							{#each Object.entries(ship.turrets) as [size, total]}
+								<span class="badge text-bg-pink me-2">{total} {size}</span>
 							{/each}
 						</td>
 					{:else}
 						{#each TURRET_SIZES as size}
-							{@const turret = ship.turrets[size]}
-							{#if turret}
-								<td class="text-nowrap">
-									{turret.total}
-								</td>
-							{:else}
-								<td>-</td>
-							{/if}
+							<td class="text-nowrap">
+								{ship.turrets[size] ?? '-'}
+							</td>
 						{/each}
 					{/if}
 					{#if cargoIsCompact}
 						<td>
-							{#each Object.entries(ship.cargo) as [type, amount]}
-								<span class="badge text-bg-green me-2">{amount} {type}</span>
+							{#each Object.entries(ship.cargo) as [type, total]}
+								<span class="badge text-bg-light me-2">{total} {type}</span>
 							{/each}
 						</td>
 					{:else}
@@ -527,28 +504,28 @@
 					{/if}
 					{#if docksIsCompact}
 						<td>
-							{#each Object.entries(ship.docks).filter(([, { external }]) => external > 0) as [size, { external }]}
-								<span class="badge text-bg-light me-2">{external} {size}</span>
+							{#each Object.entries(ship.docks) as [size, total]}
+								<span class="badge text-bg-indigo me-2">{total} {size}</span>
 							{/each}
 						</td>
 					{:else}
 						{#each DOCK_SIZES as size}
-							<td>{ship.docks[size]?.external || '-'}</td>
+							<td>{ship.docks[size] ?? '-'}</td>
 						{/each}
 					{/if}
 					{#if hangarIsCompact}
 						<td>
-							{#each Object.entries(ship.docks).filter(([, { storage }]) => storage > 0) as [size, { storage }]}
-								<span class="badge text-bg-indigo me-2">{storage} {size}</span>
+							{#each Object.entries(ship.docks) as [size, total]}
+								<span class="badge text-bg-purple me-2">{total} {size}</span>
 							{/each}
 						</td>
 					{:else}
 						{#each HANGER_SIZES as size}
-							<td>{ship.docks[size]?.storage || '-'}</td>
+							<td>{ship.docks[size] ?? '-'}</td>
 						{/each}
 					{/if}
-					<td>{props.people?.capacity ?? '-'}</td>
-					<td>{props.hull.max}</td>
+					<td>{ship.crew}</td>
+					<td>{ship.hull}</td>
 				</tr>
 			{/each}
 		</tbody>

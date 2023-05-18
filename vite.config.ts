@@ -5,7 +5,7 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
 		watch: {
-			ignored: ['**/dump/**']
+			ignored: ['**/dump/**', '**/build/**']
 		}
 	}
 });
