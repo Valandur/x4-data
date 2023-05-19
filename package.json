@@ -12,35 +12,34 @@
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "2.0.1",
-		"@sveltejs/adapter-static": "^2.0.2",
-		"@sveltejs/kit": "1.16.3",
-		"@types/cli-progress": "^3.11.0",
-		"@types/jquery": "^3.5.16",
-		"@types/node": "^20.1.7",
-		"@types/superagent": "^4.1.17",
+		"@sveltejs/adapter-static": "2.0.2",
+		"@sveltejs/kit": "1.18.0",
+		"@types/cli-progress": "3.11.0",
+		"@types/jquery": "3.5.16",
+		"@types/node": "20.2.1",
+		"@types/superagent": "4.1.17",
 		"@typescript-eslint/eslint-plugin": "5.59.6",
 		"@typescript-eslint/parser": "5.59.6",
-		"eslint": "8.40.0",
+		"cli-progress": "3.12.0",
 		"eslint-config-prettier": "8.8.0",
 		"eslint-plugin-svelte": "2.28.0",
-		"prettier": "2.8.8",
+		"eslint": "8.40.0",
 		"prettier-plugin-svelte": "2.10.0",
+		"prettier": "2.8.8",
 		"sass": "1.62.1",
-		"svelte": "3.59.1",
+		"superagent": "8.0.9",
 		"svelte-check": "3.3.2",
-		"tslib": "2.5.0",
+		"svelte": "3.59.1",
+		"tslib": "2.5.2",
 		"typescript": "5.0.4",
-		"vite": "4.3.7"
+		"vite": "4.3.8"
 	},
 	"type": "module",
 	"dependencies": {
 		"bootstrap": "5.2.3",
-		"chalk": "^5.2.0",
-		"cli-progress": "^3.12.0",
-		"date-fns": "^2.30.0",
-		"dotenv": "^16.0.3",
-		"fast-xml-parser": "^4.2.2",
-		"superagent": "^8.0.9"
+		"chalk": "5.2.0",
+		"date-fns": "2.30.0",
+		"dotenv": "16.0.3",
+		"fast-xml-parser": "4.2.2"
 	}
 }
