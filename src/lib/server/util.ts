@@ -1,4 +1,5 @@
 import { differenceInSeconds } from 'date-fns';
+import { MultiBar, Presets } from 'cli-progress';
 import { readdir, stat } from 'node:fs/promises';
 import chalk from 'chalk';
 
@@ -36,4 +37,35 @@ export async function getAllFilesInDir(logger: Logger, dir: string, ext?: string
 	logger.debug(`Found ${files.length} files`);
 
 	return files;
+}
+
+export function createMultiBars() {
+	return new MultiBar(
+		{ format: '{bar} | {name} | {value}/{total}', clearOnComplete: true },
+		Presets.shades_classic
+	);
+}
+
+export function deepMerge(
+	target: Record<string, unknown>,
+	...sources: Record<string, unknown>[]
+): Record<string, unknown> {
+	for (const source of sources) {
+		for (const prop of Object.keys(source)) {
+			if (!(prop in target)) {
+				target[prop] = source[prop];
+			} else if (typeof target[prop] !== typeof source[prop]) {
+				console.error('Different property types:', prop, target[prop], '<-->', source[prop]);
+			} else if (typeof target[prop] === 'object') {
+				target[prop] = deepMerge(
+					target[prop] as Record<string, unknown>,
+					source[prop] as Record<string, unknown>
+				);
+			} else {
+				target[prop] = source[prop];
+			}
+		}
+	}
+
+	return target;
 }

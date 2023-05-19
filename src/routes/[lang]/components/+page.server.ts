@@ -1,9 +1,9 @@
-import { COMPONENT_TYPES } from '$lib/server/data';
+import { components } from '$lib/server/component';
 
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-	const types = COMPONENT_TYPES.sort((a, b) => a.name.localeCompare(b.name));
+	const types = components.getTypes().sort((a, b) => a.name.localeCompare(b.name));
 
 	return {
 		types

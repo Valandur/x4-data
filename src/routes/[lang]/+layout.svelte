@@ -114,13 +114,6 @@
 					</a>
 				</div>
 
-				<div class="menu-item" class:active={$page.url.pathname === `/${lang}/weapons`}>
-					<a href="/{lang}/weapons" class="menu-link">
-						<span class="menu-icon"><i class="fa-solid fa-gun" /></span>
-						<span class="menu-text">Weapons & Turrets</span>
-					</a>
-				</div>
-
 				<div class="menu-item" class:active={$page.url.pathname.startsWith(`/${lang}/components`)}>
 					<a href="/{lang}/components" class="menu-link">
 						<span class="menu-icon"><i class="fa-solid fa-object-ungroup" /></span>

@@ -1,4 +1,4 @@
-import { LANGUAGES } from '$lib/server/translation';
+import { LANGUAGES } from '$lib/server/i18n';
 
 import type { EntryGenerator } from './$types';
 

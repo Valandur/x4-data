@@ -6,7 +6,7 @@ import { getAllFilesInDir } from './util';
 import { Logger } from './logger';
 
 const CACHE = '.cache/translation';
-const REGEX_REF = /{(\d+,\d+)}/gi;
+const REGEX_REF = /{\s*(\d+)\s*,\s*(\d+)\s*}/gi;
 const REGEX_DEFAULT = /(?<!\\)\((.*?)(?<!\\)\)/gi;
 const KNOWN_LANGS: Record<string, string> = {
 	'44': 'en',
@@ -25,7 +25,7 @@ const KNOWN_LANGS: Record<string, string> = {
 
 const languages: Map<string, string> = new Map();
 const translations: Map<string, Map<string, string>> = new Map();
-const logger = new Logger('translation');
+const logger = new Logger('I18N');
 const parser = new XMLParser({
 	ignoreDeclaration: true,
 	ignoreAttributes: false,
@@ -47,12 +47,12 @@ if (cache) {
 	}
 	logger.debug('Restored languages & translations from cache');
 } else {
-	const xmlLangs = parser.parse(await readFile('dump/libraries/languages.xml'));
+	const xmlLangs = parser.parse(await readFile('data/libraries/languages.xml'));
 	const rawLangs: { id: string; name: string }[] = xmlLangs.languages.language;
 
 	logger.debug(`Found ${rawLangs.length} supported languages`);
 
-	const tFileNames = await getAllFilesInDir(logger, 'dump/out/t', '.xml');
+	const tFileNames = await getAllFilesInDir(logger, 'data/out/t', '.xml');
 	for (const tFileName of tFileNames) {
 		const tObj = parser.parse(await readFile(tFileName));
 		const id = tObj.language.id;
@@ -92,8 +92,8 @@ export function t<T>(keyOrObj: string | T, lang: string, depth = 2): string | T 
 	if (typeof keyOrObj === 'string') {
 		return keyOrObj
 			.replaceAll(REGEX_DEFAULT, '')
-			.replaceAll(REGEX_REF, (_, ref) => {
-				const res = translations.get(lang)?.get(ref);
+			.replaceAll(REGEX_REF, (_, pageId, tId) => {
+				const res = translations.get(lang)?.get(`${pageId},${tId}`);
 				if (!res) {
 					console.warn(`Could not find translation ${_} in ${lang}`);
 					return _;

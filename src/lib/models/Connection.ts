@@ -4,6 +4,7 @@ export interface Connection {
 	tags?: string;
 	value?: number;
 	optional?: number;
+	match?: string;
 }
 
 export interface ConnectionRef {

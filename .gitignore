@@ -4,7 +4,7 @@ node_modules
 /.svelte-kit
 /package
 /.cache
-/dump
+/data
 .env
 .env.*
 !.env.example

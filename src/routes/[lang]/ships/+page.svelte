@@ -277,168 +277,165 @@
 	<table id="table-ships" class="table table-striped table-hover">
 		<thead class="table-light">
 			<tr>
-				<th />
-				<th class="text-nowrap">
-					<span>Size</span>
-					<SortButton bind:orderBy prop="size" />
-				</th>
-				<th class="text-nowrap">
-					<span>Role</span>
-					<SortButton bind:orderBy prop="type" />
-				</th>
-				<th class="text-nowrap">
-					<span>Purpose</span>
-					<SortButton bind:orderBy prop="purpose" />
-				</th>
-				<th class="text-nowrap">
+				<th style:width="100px" />
+				<th>
 					<span>Name</span>
 					<SortButton bind:orderBy prop="ident" />
 				</th>
-				<th colSpan={engineIsCompact ? 1 : ENGINE_SIZES.length} class="text-nowrap">
+				<th>
+					<span>Size</span>
+					<SortButton bind:orderBy prop="size" />
+				</th>
+				<th>
+					<span>Purpose</span>
+					<SortButton bind:orderBy prop="purpose" />
+				</th>
+				<th>
+					<span>Role</span>
+					<SortButton bind:orderBy prop="type" />
+				</th>
+				<th colSpan={engineIsCompact ? 1 : ENGINE_SIZES.length}>
 					<span>Engines</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onEngineToggle}>
 						<i class="fa-solid fa-{engineIsCompact ? 'plus' : 'minus'}" />
 					</button>
 				</th>
-				<th colSpan={shieldIsCompact ? 1 : SHIELD_SIZES.length} class="text-nowrap">
+				<th colSpan={shieldIsCompact ? 1 : SHIELD_SIZES.length}>
 					<span>Shields</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onShieldToggle}>
 						<i class="fa-solid fa-{shieldIsCompact ? 'plus' : 'minus'}" />
 					</button>
 				</th>
-				<th colSpan={weaponIsCompact ? 1 : WEAPON_SIZES.length} class="text-nowrap">
+				<th colSpan={weaponIsCompact ? 1 : WEAPON_SIZES.length}>
 					<span>Weapons</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onWeaponToggle}>
 						<i class="fa-solid fa-{weaponIsCompact ? 'plus' : 'minus'}" />
 					</button>
 				</th>
-				<th colSpan={turretIsCompact ? 1 : TURRET_SIZES.length} class="text-nowrap">
+				<th colSpan={turretIsCompact ? 1 : TURRET_SIZES.length}>
 					<span>Turrets</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onTurretToggle}>
 						<i class="fa-solid fa-{turretIsCompact ? 'plus' : 'minus'}" />
 					</button>
 				</th>
-				<th colSpan={cargoIsCompact ? 1 : CARGO_TYPES.length} class="text-nowrap">
+				<th colSpan={cargoIsCompact ? 1 : CARGO_TYPES.length}>
 					<span>Cargo</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onCargoToggle}>
 						<i class="fa-solid fa-{cargoIsCompact ? 'plus' : 'minus'}" />
 					</button>
 				</th>
-				<th colSpan={docksIsCompact ? 1 : DOCK_SIZES.length} class="text-nowrap">
+				<th colSpan={docksIsCompact ? 1 : DOCK_SIZES.length}>
 					<span>Docks</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onDockToggle}>
 						<i class="fa-solid fa-{docksIsCompact ? 'plus' : 'minus'}" />
 					</button>
 				</th>
-				<th colSpan={hangarIsCompact ? 1 : HANGER_SIZES.length} class="text-nowrap">
+				<th colSpan={hangarIsCompact ? 1 : HANGER_SIZES.length}>
 					<span>Hangars</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onHangarToggle}>
 						<i class="fa-solid fa-{hangarIsCompact ? 'plus' : 'minus'}" />
 					</button>
 				</th>
-				<th class="text-nowrap">
+				<th>
 					<span>Crew</span>
 					<SortButton bind:orderBy prop="crew" />
 				</th>
-				<th class="text-nowrap">
+				<th>
 					<span>Hull</span>
 					<SortButton bind:orderBy prop="hull" />
 				</th>
 			</tr>
-			{#if !engineIsCompact || !shieldIsCompact || !weaponIsCompact || !turretIsCompact || !cargoIsCompact || !docksIsCompact || !hangarIsCompact}
-				<tr>
-					<th colSpan="5" />
-					{#if engineIsCompact}
-						<th />
-					{:else}
-						{#each ENGINE_SIZES as size}
-							<th class="text-nowrap">
-								<span>{size}</span>
-								<SortButton bind:orderBy prop="engines.{size}" />
-							</th>
-						{/each}
-					{/if}
-					{#if shieldIsCompact}
-						<th />
-					{:else}
-						{#each SHIELD_SIZES as size}
-							<th class="text-nowrap">
-								<span>{size}</span>
-								<SortButton bind:orderBy prop="shields.{size}" />
-							</th>
-						{/each}
-					{/if}
-					{#if weaponIsCompact}
-						<th />
-					{:else}
-						{#each WEAPON_SIZES as size}
-							<th class="text-nowrap">
-								<span>{size}</span>
-								<SortButton bind:orderBy prop="weapons.{size}" />
-							</th>
-						{/each}
-					{/if}
-					{#if turretIsCompact}
-						<th />
-					{:else}
-						{#each TURRET_SIZES as size}
-							<th class="text-nowrap">
-								<span>{size}</span>
-								<SortButton bind:orderBy prop="turrets.{size}" />
-							</th>
-						{/each}
-					{/if}
-					{#if cargoIsCompact}
-						<th />
-					{:else}
-						{#each CARGO_TYPES as type}
-							<th class="text-nowrap">
-								<span>{CARGO_NAMES[type]}</span>
-								<SortButton bind:orderBy prop="cargo.{type}" />
-							</th>
-						{/each}
-					{/if}
-					{#if docksIsCompact}
-						<th />
-					{:else}
-						{#each DOCK_SIZES as size}
-							<th class="text-nowrap">
-								<span>{size}</span>
-								<SortButton bind:orderBy prop="docks.{size}" />
-							</th>
-						{/each}
-					{/if}
-					{#if hangarIsCompact}
-						<th />
-					{:else}
-						{#each HANGER_SIZES as size}
-							<th class="text-nowrap">
-								<span>{size}</span>
-								<SortButton bind:orderBy prop="hangars.{size}" />
-							</th>
-						{/each}
-					{/if}
-					<th colSpan="2" />
-				</tr>
-			{/if}
+			<tr>
+				<th colSpan="4" />
+				{#if engineIsCompact}
+					<th />
+				{:else}
+					{#each ENGINE_SIZES as size}
+						<th>
+							<span>{size}</span>
+							<SortButton bind:orderBy prop="engines.{size}" />
+						</th>
+					{/each}
+				{/if}
+				{#if shieldIsCompact}
+					<th />
+				{:else}
+					{#each SHIELD_SIZES as size}
+						<th>
+							<span>{size}</span>
+							<SortButton bind:orderBy prop="shields.{size}" />
+						</th>
+					{/each}
+				{/if}
+				{#if weaponIsCompact}
+					<th />
+				{:else}
+					{#each WEAPON_SIZES as size}
+						<th>
+							<span>{size}</span>
+							<SortButton bind:orderBy prop="weapons.{size}" />
+						</th>
+					{/each}
+				{/if}
+				{#if turretIsCompact}
+					<th />
+				{:else}
+					{#each TURRET_SIZES as size}
+						<th>
+							<span>{size}</span>
+							<SortButton bind:orderBy prop="turrets.{size}" />
+						</th>
+					{/each}
+				{/if}
+				{#if cargoIsCompact}
+					<th />
+				{:else}
+					{#each CARGO_TYPES as type}
+						<th>
+							<span>{CARGO_NAMES[type]}</span>
+							<SortButton bind:orderBy prop="cargo.{type}" />
+						</th>
+					{/each}
+				{/if}
+				{#if docksIsCompact}
+					<th />
+				{:else}
+					{#each DOCK_SIZES as size}
+						<th>
+							<span>{size}</span>
+							<SortButton bind:orderBy prop="docks.{size}" />
+						</th>
+					{/each}
+				{/if}
+				{#if hangarIsCompact}
+					<th />
+				{:else}
+					{#each HANGER_SIZES as size}
+						<th>
+							<span>{size}</span>
+							<SortButton bind:orderBy prop="hangars.{size}" />
+						</th>
+					{/each}
+				{/if}
+				<th colSpan="3" />
+			</tr>
 		</thead>
 		<tbody>
 			{#each filteredShips as ship}
 				<tr>
-					<td>
+					<td class="p-0" style:vertical-align="middle">
 						<img
-							src="https://roguey.co.uk/x4/ships/pics/{ship.size.toLowerCase()}/{ship.name}_l.jpg"
-							referrerpolicy="no-referrer"
-							alt={ship.ident}
-							width="100"
+							src="/data/images/ships/{ship.size}/{ship.name}_s.jpg"
+							alt="Preview"
+							style:max-height="2.5em"
 						/>
 					</td>
-					<td>{ship.size}</td>
-					<td>{ship.type}</td>
-					<td>{ship.purpose}</td>
 					<td>
 						<a href="/{data.lang}/macros/{ship.class}/{ship.name}">{ship.ident}</a>
 					</td>
+					<td>{ship.size}</td>
+					<td>{ship.purpose}</td>
+					<td>{ship.type}</td>
 					{#if engineIsCompact}
 						<td>
 							{#each Object.entries(ship.engines) as [size, total]}
@@ -447,7 +444,7 @@
 						</td>
 					{:else}
 						{#each ENGINE_SIZES as size}
-							<td class="text-nowrap">
+							<td>
 								{ship.engines[size] ?? '-'}
 							</td>
 						{/each}
@@ -460,7 +457,7 @@
 						</td>
 					{:else}
 						{#each SHIELD_SIZES as size}
-							<td class="text-nowrap">
+							<td>
 								{ship.shields[size] ?? '-'}
 							</td>
 						{/each}
@@ -473,7 +470,7 @@
 						</td>
 					{:else}
 						{#each WEAPON_SIZES as size}
-							<td class="text-nowrap">
+							<td>
 								{ship.weapons[size] ?? '-'}
 							</td>
 						{/each}
@@ -486,7 +483,7 @@
 						</td>
 					{:else}
 						{#each TURRET_SIZES as size}
-							<td class="text-nowrap">
+							<td>
 								{ship.turrets[size] ?? '-'}
 							</td>
 						{/each}
@@ -494,7 +491,7 @@
 					{#if cargoIsCompact}
 						<td>
 							{#each Object.entries(ship.cargo) as [type, total]}
-								<span class="badge text-bg-light me-2">{total} {type}</span>
+								<span class="badge text-bg-light me-2">{total} {CARGO_NAMES[type]}</span>
 							{/each}
 						</td>
 					{:else}
@@ -537,5 +534,23 @@
 		font-size: 0.6rem;
 		padding: 2px 4px;
 		margin: 0;
+	}
+
+	.table {
+		> thead {
+			> tr {
+				> th {
+					white-space: nowrap;
+				}
+			}
+		}
+
+		> tbody {
+			> tr {
+				> td {
+					white-space: nowrap;
+				}
+			}
+		}
 	}
 </style>

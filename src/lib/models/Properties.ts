@@ -21,6 +21,8 @@ export interface Properties {
 	thruster?: PropertyThruster;
 	undock?: PropertyUndock;
 	weapon?: PropertyWeapon;
+
+	[key: string]: unknown;
 }
 
 export interface PropertyAmmunition {
