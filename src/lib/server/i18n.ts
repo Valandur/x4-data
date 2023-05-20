@@ -47,7 +47,7 @@ if (cache) {
 	}
 	logger.debug('Restored languages & translations from cache');
 } else {
-	const xmlLangs = parser.parse(await readFile('data/libraries/languages.xml'));
+	const xmlLangs = parser.parse(await readFile('data/out/libraries/languages.xml'));
 	const rawLangs: { id: string; name: string }[] = xmlLangs.languages.language;
 
 	logger.debug(`Found ${rawLangs.length} supported languages`);
