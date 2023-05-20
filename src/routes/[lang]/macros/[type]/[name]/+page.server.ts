@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 
+import { i18n } from '$lib/server/i18n';
 import { macros } from '$lib/server/macro';
-import { t } from '$lib/server/i18n';
 
 import type { PageServerLoad } from './$types';
 
@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		throw redirect(307, `/${lang}/macros/${type}`);
 	}
 
-	macro = t(macro, lang);
+	macro = i18n.t(macro, lang);
 
 	return {
 		lang,

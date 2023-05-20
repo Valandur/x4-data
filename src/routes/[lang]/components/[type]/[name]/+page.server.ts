@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 
 import { components } from '$lib/server/component';
-import { t } from '$lib/server/i18n';
+import { i18n } from '$lib/server/i18n';
 
 import type { PageServerLoad } from './$types';
 
@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		throw redirect(307, `/${lang}/components/${type}`);
 	}
 
-	component = t(component, lang);
+	component = i18n.t(component, lang);
 
 	return {
 		lang,

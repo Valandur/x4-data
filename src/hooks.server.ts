@@ -4,10 +4,11 @@ import { error, type Handle, type HandleServerError } from '@sveltejs/kit';
 
 import { components } from '$lib/server/component';
 import { data } from '$lib/server/data';
+import { defaults } from '$lib/server/default';
+import { i18n } from '$lib/server/i18n';
 import { Logger } from '$lib/server/logger';
 import { macros } from '$lib/server/macro';
 import { ships } from '$lib/server/ship';
-import { defaults } from '$lib/server/default';
 
 const logger = new Logger('MAIN');
 
@@ -39,6 +40,9 @@ export const handleError: HandleServerError = async ({ error, event }) => {
 async function init() {
 	logger.info('Starting...');
 
+	if (await i18n.setup()) {
+		data.subscribe(i18n);
+	}
 	if (await defaults.setup()) {
 		data.subscribe(defaults);
 	}
@@ -56,11 +60,13 @@ async function init() {
 		await data.init();
 	}
 
+	data.unsubscribe(i18n);
 	data.unsubscribe(defaults);
 	data.unsubscribe(macros);
 	data.unsubscribe(components);
 	data.unsubscribe(ships);
 
+	await i18n.ready();
 	await defaults.ready();
 	await macros.ready();
 	await components.ready();

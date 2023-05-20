@@ -1,5 +1,5 @@
+import { i18n } from '$lib/server/i18n';
 import { ships } from '$lib/server/ship';
-import { t } from '$lib/server/i18n';
 
 import type { PageServerLoad } from './$types';
 
@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 
 	const { lang } = await parent();
 
-	allShips = allShips.map((s) => t(s, lang));
+	allShips = allShips.map((s) => i18n.t(s, lang));
 
 	const roles = allShips
 		.map((s) => s.type)

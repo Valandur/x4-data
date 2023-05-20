@@ -64,9 +64,9 @@
 						<div class="menu-text d-sm-block d-none">{data.langName}</div>
 					</button>
 					<div class="dropdown-menu dropdown-menu-end me-lg-3 fs-11px mt-1">
-						{#each langs as lang}
-							<a class="dropdown-item d-flex align-items-center" href="/{lang.key}{pathAndSearch}">
-								{lang.name}
+						{#each langs as [key, name]}
+							<a class="dropdown-item d-flex align-items-center" href="/{key}{pathAndSearch}">
+								{name}
 							</a>
 						{/each}
 					</div>
