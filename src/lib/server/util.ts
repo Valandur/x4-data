@@ -48,21 +48,45 @@ export function createMultiBars() {
 
 export function deepMerge(
 	target: Record<string, unknown>,
-	...sources: Record<string, unknown>[]
+	source: Record<string, unknown>,
+	path?: string
 ): Record<string, unknown> {
-	for (const source of sources) {
-		for (const prop of Object.keys(source)) {
-			if (!(prop in target)) {
-				target[prop] = source[prop];
-			} else if (typeof target[prop] !== typeof source[prop]) {
-				console.error('Different property types:', prop, target[prop], '<-->', source[prop]);
-			} else if (typeof target[prop] === 'object') {
-				target[prop] = deepMerge(
-					target[prop] as Record<string, unknown>,
-					source[prop] as Record<string, unknown>
-				);
+	for (const prop of Object.keys(source)) {
+		const targetVal = target[prop];
+		const sourceVal = source[prop];
+
+		if (!(prop in target)) {
+			target[prop] = source[prop];
+		} else if (typeof targetVal !== typeof sourceVal) {
+			// Some special case handling because of the way we parse XML
+			if (typeof targetVal === 'number' && typeof sourceVal === 'boolean') {
+				// If the value in the new object is 0 or 1, but the source says it's a bool, convert
+				if (targetVal === 0) {
+					target[prop] = false;
+				} else if (targetVal === 1) {
+					target[prop] = true;
+				}
+			} else if (typeof targetVal === 'string' && typeof sourceVal === 'number') {
+				// If the target value is a string, but the source says it's a number, try to parse
+				const val = parseFloat(targetVal);
+				if (Number.isFinite(val)) {
+					target[prop] = val;
+				}
+			} else if (targetVal === '' && typeof sourceVal === 'object') {
+				// If the target value is an empty string and the source is an object, replace
+				target[prop] = sourceVal;
 			} else {
-				target[prop] = source[prop];
+				console.warn('Different property types', path, prop, target, source);
+			}
+		} else if (typeof targetVal === 'object' && targetVal !== null) {
+			if (Array.isArray(targetVal)) {
+				target[prop] = (targetVal as unknown[]).concat(sourceVal);
+			} else {
+				target[prop] = deepMerge(
+					targetVal as Record<string, unknown>,
+					sourceVal as Record<string, unknown>,
+					(path ? path + '.' : '') + prop
+				);
 			}
 		}
 	}
