@@ -56,7 +56,13 @@ class ShipService {
 		// - with alias (usually used only internally)
 		// - without properties/identification (should only be the dummy ship)
 		// - without ship property (should only be the boarding pod)
-		if (macro.alias || !macro.properties.identification || !macro.properties.ship) {
+		// - without purpose property (should be none)
+		if (
+			macro.alias ||
+			!macro.properties.identification ||
+			!macro.properties.ship ||
+			!macro.properties.purpose
+		) {
 			return null;
 		}
 
@@ -155,7 +161,7 @@ class ShipService {
 			name: name,
 			size: size,
 			type: macro.properties.ship.type,
-			purpose: macro.properties.purpose?.primary ?? '-',
+			purpose: macro.properties.purpose.primary,
 			ident: macro.properties.identification.name,
 			crew: macro.properties.people?.capacity,
 			hull: macro.properties.hull?.max,
