@@ -346,7 +346,26 @@
 				</th>
 			</tr>
 			<tr>
-				<th colSpan="4" />
+				<th colSpan="5" class="p-1" style:vertical-align="middle">
+					{#if orderBy.length > 0}
+						<div class="d-flex flex-wrap flex-row align-items-center row-gap-1 fs-5">
+							<span class="badge text-bg-primary me-1">Sort</span>
+							{#each orderBy as order}
+								<button
+									class="btn btn-danger p-1 m-0 me-1"
+									style:font-size="0.6rem"
+									on:click={() => (orderBy = orderBy.filter((o) => o !== order))}
+								>
+									<i class="fa-solid fa-arrow-{order.startsWith('-') ? 'down' : 'up'}" />
+									<span class="mx-2">
+										{(order.startsWith('-') ? order.substring(1) : order).replaceAll('.', ' ')}
+									</span>
+									<i class="fa-solid fa-x" />
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</th>
 				{#if engineIsCompact}
 					<th />
 				{:else}
@@ -521,8 +540,8 @@
 							<td>{ship.docks[size] ?? '-'}</td>
 						{/each}
 					{/if}
-					<td>{ship.crew}</td>
-					<td>{ship.hull}</td>
+					<td>{ship.crew ?? '-'}</td>
+					<td>{ship.hull ?? '-'}</td>
 				</tr>
 			{/each}
 		</tbody>
