@@ -1,23 +1,10 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-
-	import { afterNavigate, goto } from '$app/navigation';
-	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-
 	import { CARGO_TYPES, SIZES, Size } from '$lib/models/Constants';
+	import { trackUrlParams } from '$lib/stores/url-params';
 	import SortButton from '$lib/components/SortButton.svelte';
 
 	import type { PageData } from './$types';
 
-	const PARAM_SEP = '_';
-	const PARAM_TEXT = 'q';
-	const PARAM_ROLES = 'r';
-	const PARAM_PURPOSES = 'p';
-	const PARAM_SIZES = 's';
-	const PARAM_TOGGLES = 't';
-	const PARAM_ORDER = 'o';
-	const SEARCH_DELAY = 500;
 	const ENGINE_SIZES = SIZES;
 	const SHIELD_SIZES = [Size.S, Size.M, Size.L, Size.XL];
 	const WEAPON_SIZES = SIZES;
@@ -33,30 +20,36 @@
 
 	export let data: PageData;
 
-	let navTimeout: ReturnType<typeof setTimeout> | null = null;
-	let filterText = '';
-	let filterRoles: string[] = [];
-	let filterPurposes: string[] = [];
-	let filterSizes: string[] = [];
-	let orderBy: string[] = [];
-	let engineIsCompact = true;
-	let shieldIsCompact = true;
-	let weaponIsCompact = true;
-	let turretIsCompact = true;
-	let cargoIsCompact = true;
-	let docksIsCompact = true;
-	let hangarIsCompact = true;
+	const params = trackUrlParams({
+		text: { name: 'q', default: '' },
+		roles: { name: 'r', default: [] },
+		purposes: { name: 'p', default: [] },
+		sizes: { name: 's', default: [] },
+		order: { name: 'o', default: [] },
+		expand: {
+			name: 't',
+			flags: {
+				engines: { name: 'e', default: false },
+				shields: { name: 's', default: false },
+				weapons: { name: 'w', default: false },
+				turrets: { name: 't', default: false },
+				cargo: { name: 'c', default: false },
+				docks: { name: 'd', default: false },
+				hangars: { name: 'h', default: false }
+			}
+		}
+	});
 
 	$: filteredShips = data.ships
 		.filter(
 			(ship) =>
-				(!filterText || ship.ident.toLocaleLowerCase().includes(filterText)) &&
-				(!filterRoles.length || filterRoles.includes(ship.type)) &&
-				(!filterPurposes.length || filterPurposes.includes(ship.purpose)) &&
-				(!filterSizes.length || filterSizes.includes(ship.size))
+				(!$params.text || ship.ident.toLocaleLowerCase().includes($params.text)) &&
+				(!$params.roles.length || $params.roles.includes(ship.type)) &&
+				(!$params.purposes.length || $params.purposes.includes(ship.purpose)) &&
+				(!$params.sizes.length || $params.sizes.includes(ship.size))
 		)
 		.sort((shipA, shipB) => {
-			for (const order of orderBy) {
+			for (const order of $params.order) {
 				const neg = order[0] === '-';
 				const parts = order.substring(neg ? 1 : 0).split('.');
 				let valueA: any = shipA;
@@ -85,104 +78,26 @@
 			return shipA.ident.localeCompare(shipB.ident);
 		});
 
-	$: if (browser) {
-		clearNavTimeout();
-		navTimeout = setTimeout(() => {
-			const oldParams = $page.url.searchParams;
-			const newParams = new URLSearchParams(oldParams);
-			if (filterText) {
-				newParams.set(PARAM_TEXT, filterText);
-			} else {
-				newParams.delete(PARAM_TEXT);
-			}
-			if (filterRoles.length > 0) {
-				newParams.set(PARAM_ROLES, filterRoles.join(PARAM_SEP));
-			} else {
-				newParams.delete(PARAM_ROLES);
-			}
-			if (filterPurposes.length > 0) {
-				newParams.set(PARAM_PURPOSES, filterPurposes.join(PARAM_SEP));
-			} else {
-				newParams.delete(PARAM_PURPOSES);
-			}
-			if (filterSizes.length > 0) {
-				newParams.set(PARAM_SIZES, filterSizes.join(PARAM_SEP));
-			} else {
-				newParams.delete(PARAM_SIZES);
-			}
-			if (orderBy.length > 0) {
-				newParams.set(PARAM_ORDER, orderBy.join(PARAM_SEP));
-			} else {
-				newParams.delete(PARAM_ORDER);
-			}
-			const toggles = [
-				engineIsCompact ? '' : 'e',
-				shieldIsCompact ? '' : 's',
-				weaponIsCompact ? '' : 'w',
-				turretIsCompact ? '' : 't',
-				cargoIsCompact ? '' : 'c',
-				docksIsCompact ? '' : 'd',
-				hangarIsCompact ? '' : 'h'
-			].join('');
-			if (toggles.length > 0) {
-				newParams.set(PARAM_TOGGLES, toggles);
-			} else {
-				newParams.delete(PARAM_TOGGLES);
-			}
-			const newSearch = newParams.toString();
-
-			if (newSearch !== oldParams.toString()) {
-				goto(`?${newSearch}`, { keepFocus: true, noScroll: true });
-			}
-		}, SEARCH_DELAY);
-	}
-
-	onDestroy(() => clearNavTimeout());
-	afterNavigate((nav) => {
-		const params = nav.to?.url.searchParams;
-		filterText = params?.get(PARAM_TEXT) ?? '';
-		filterRoles = params?.get(PARAM_ROLES)?.split(PARAM_SEP) ?? [];
-		filterPurposes = params?.get(PARAM_PURPOSES)?.split(PARAM_SEP) ?? [];
-		filterSizes = params?.get(PARAM_SIZES)?.split(PARAM_SEP) ?? [];
-		orderBy = params?.get(PARAM_ORDER)?.split(PARAM_SEP) ?? [];
-
-		const urlToggles = params?.get(PARAM_TOGGLES) ?? '';
-		engineIsCompact = !urlToggles.includes('e');
-		shieldIsCompact = !urlToggles.includes('s');
-		weaponIsCompact = !urlToggles.includes('w');
-		turretIsCompact = !urlToggles.includes('t');
-		cargoIsCompact = !urlToggles.includes('c');
-		docksIsCompact = !urlToggles.includes('d');
-		hangarIsCompact = !urlToggles.includes('h');
-	});
-
-	function clearNavTimeout() {
-		if (navTimeout) {
-			clearTimeout(navTimeout);
-			navTimeout = null;
-		}
-	}
-
 	function onEngineToggle() {
-		engineIsCompact = !engineIsCompact;
+		$params.expand.engines = !$params.expand.engines;
 	}
 	function onShieldToggle() {
-		shieldIsCompact = !shieldIsCompact;
+		$params.expand.shields = !$params.expand.shields;
 	}
 	function onWeaponToggle() {
-		weaponIsCompact = !weaponIsCompact;
+		$params.expand.weapons = !$params.expand.weapons;
 	}
 	function onTurretToggle() {
-		turretIsCompact = !turretIsCompact;
+		$params.expand.turrets = !$params.expand.turrets;
 	}
 	function onCargoToggle() {
-		cargoIsCompact = !cargoIsCompact;
+		$params.expand.cargo = !$params.expand.cargo;
 	}
 	function onDockToggle() {
-		docksIsCompact = !docksIsCompact;
+		$params.expand.docks = !$params.expand.docks;
 	}
 	function onHangarToggle() {
-		hangarIsCompact = !hangarIsCompact;
+		$params.expand.hangars = !$params.expand.hangars;
 	}
 </script>
 
@@ -203,7 +118,7 @@
 							name="sizes"
 							class="form-check-input"
 							value={size}
-							bind:group={filterSizes}
+							bind:group={$params.sizes}
 						/>
 						<label class="form-check-label" for="size{size}CheckBox">{size}</label>
 					</div>
@@ -219,12 +134,12 @@
 						class="form-control"
 						name="search"
 						placeholder="Find a ship by name..."
-						bind:value={filterText}
+						bind:value={$params.text}
 					/>
 					<button
-						disabled={!filterText}
-						class="btn btn-{filterText ? '' : 'outline-'}danger"
-						on:click={() => (filterText = '')}
+						disabled={!$params.text}
+						class="btn btn-{$params.text ? '' : 'outline-'}danger"
+						on:click={() => ($params.text = '')}
 					>
 						<i class="fa-solid fa-remove" />
 					</button>
@@ -244,7 +159,7 @@
 							name="purposes"
 							class="form-check-input"
 							value={purpose}
-							bind:group={filterPurposes}
+							bind:group={$params.purposes}
 						/>
 						<label class="form-check-label" for="purpose{purpose}CheckBox">{purpose}</label>
 					</div>
@@ -263,7 +178,7 @@
 							name="roles"
 							class="form-check-input"
 							value={role}
-							bind:group={filterRoles}
+							bind:group={$params.roles}
 						/>
 						<label class="form-check-label" for="role{role}CheckBox">{role}</label>
 					</div>
@@ -280,81 +195,81 @@
 				<th style:width="100px" />
 				<th>
 					<span>Name</span>
-					<SortButton bind:orderBy prop="ident" />
+					<SortButton bind:orderBy={$params.order} prop="ident" />
 				</th>
 				<th>
 					<span>Size</span>
-					<SortButton bind:orderBy prop="size" />
+					<SortButton bind:orderBy={$params.order} prop="size" />
 				</th>
 				<th>
 					<span>Purpose</span>
-					<SortButton bind:orderBy prop="purpose" />
+					<SortButton bind:orderBy={$params.order} prop="purpose" />
 				</th>
 				<th>
 					<span>Role</span>
-					<SortButton bind:orderBy prop="type" />
+					<SortButton bind:orderBy={$params.order} prop="type" />
 				</th>
-				<th colSpan={engineIsCompact ? 1 : ENGINE_SIZES.length}>
+				<th colSpan={$params.expand.engines ? ENGINE_SIZES.length : 1}>
 					<span>Engines</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onEngineToggle}>
-						<i class="fa-solid fa-{engineIsCompact ? 'plus' : 'minus'}" />
+						<i class="fa-solid fa-{$params.expand.engines ? 'minus' : 'plus'}" />
 					</button>
 				</th>
-				<th colSpan={shieldIsCompact ? 1 : SHIELD_SIZES.length}>
+				<th colSpan={$params.expand.shields ? SHIELD_SIZES.length : 1}>
 					<span>Shields</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onShieldToggle}>
-						<i class="fa-solid fa-{shieldIsCompact ? 'plus' : 'minus'}" />
+						<i class="fa-solid fa-{$params.expand.shields ? 'minus' : 'plus'}" />
 					</button>
 				</th>
-				<th colSpan={weaponIsCompact ? 1 : WEAPON_SIZES.length}>
+				<th colSpan={$params.expand.weapons ? WEAPON_SIZES.length : 1}>
 					<span>Weapons</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onWeaponToggle}>
-						<i class="fa-solid fa-{weaponIsCompact ? 'plus' : 'minus'}" />
+						<i class="fa-solid fa-{$params.expand.weapons ? 'minus' : 'plus'}" />
 					</button>
 				</th>
-				<th colSpan={turretIsCompact ? 1 : TURRET_SIZES.length}>
+				<th colSpan={$params.expand.turrets ? TURRET_SIZES.length : 1}>
 					<span>Turrets</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onTurretToggle}>
-						<i class="fa-solid fa-{turretIsCompact ? 'plus' : 'minus'}" />
+						<i class="fa-solid fa-{$params.expand.turrets ? 'minus' : 'plus'}" />
 					</button>
 				</th>
-				<th colSpan={cargoIsCompact ? 1 : CARGO_TYPES.length}>
+				<th colSpan={$params.expand.cargo ? CARGO_TYPES.length : 1}>
 					<span>Cargo</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onCargoToggle}>
-						<i class="fa-solid fa-{cargoIsCompact ? 'plus' : 'minus'}" />
+						<i class="fa-solid fa-{$params.expand.cargo ? 'minus' : 'plus'}" />
 					</button>
 				</th>
-				<th colSpan={docksIsCompact ? 1 : DOCK_SIZES.length}>
+				<th colSpan={$params.expand.docks ? DOCK_SIZES.length : 1}>
 					<span>Docks</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onDockToggle}>
-						<i class="fa-solid fa-{docksIsCompact ? 'plus' : 'minus'}" />
+						<i class="fa-solid fa-{$params.expand.docks ? 'minus' : 'plus'}" />
 					</button>
 				</th>
-				<th colSpan={hangarIsCompact ? 1 : HANGER_SIZES.length}>
+				<th colSpan={$params.expand.hangars ? HANGER_SIZES.length : 1}>
 					<span>Hangars</span>
 					<button type="button" class="btn btn-sm btn-primary ms-2" on:click={onHangarToggle}>
-						<i class="fa-solid fa-{hangarIsCompact ? 'plus' : 'minus'}" />
+						<i class="fa-solid fa-{$params.expand.hangars ? 'minus' : 'plus'}" />
 					</button>
 				</th>
 				<th>
 					<span>Crew</span>
-					<SortButton bind:orderBy prop="crew" />
+					<SortButton bind:orderBy={$params.order} prop="crew" />
 				</th>
 				<th>
 					<span>Hull</span>
-					<SortButton bind:orderBy prop="hull" />
+					<SortButton bind:orderBy={$params.order} prop="hull" />
 				</th>
 			</tr>
 			<tr>
 				<th colSpan="5" class="p-1" style:vertical-align="middle">
-					{#if orderBy.length > 0}
+					{#if $params.order.length > 0}
 						<div class="d-flex flex-wrap flex-row align-items-center row-gap-1 fs-5">
 							<span class="badge text-bg-primary me-1">Sort</span>
-							{#each orderBy as order}
+							{#each $params.order as order}
 								<button
 									class="btn btn-danger p-1 m-0 me-1"
 									style:font-size="0.6rem"
-									on:click={() => (orderBy = orderBy.filter((o) => o !== order))}
+									on:click={() => ($params.order = $params.order.filter((o) => o !== order))}
 								>
 									<i class="fa-solid fa-arrow-{order.startsWith('-') ? 'down' : 'up'}" />
 									<span class="mx-2">
@@ -366,73 +281,73 @@
 						</div>
 					{/if}
 				</th>
-				{#if engineIsCompact}
+				{#if !$params.expand.engines}
 					<th />
 				{:else}
 					{#each ENGINE_SIZES as size}
 						<th>
 							<span>{size}</span>
-							<SortButton bind:orderBy prop="engines.{size}" />
+							<SortButton bind:orderBy={$params.order} prop="engines.{size}" />
 						</th>
 					{/each}
 				{/if}
-				{#if shieldIsCompact}
+				{#if !$params.expand.shields}
 					<th />
 				{:else}
 					{#each SHIELD_SIZES as size}
 						<th>
 							<span>{size}</span>
-							<SortButton bind:orderBy prop="shields.{size}" />
+							<SortButton bind:orderBy={$params.order} prop="shields.{size}" />
 						</th>
 					{/each}
 				{/if}
-				{#if weaponIsCompact}
+				{#if !$params.expand.weapons}
 					<th />
 				{:else}
 					{#each WEAPON_SIZES as size}
 						<th>
 							<span>{size}</span>
-							<SortButton bind:orderBy prop="weapons.{size}" />
+							<SortButton bind:orderBy={$params.order} prop="weapons.{size}" />
 						</th>
 					{/each}
 				{/if}
-				{#if turretIsCompact}
+				{#if !$params.expand.turrets}
 					<th />
 				{:else}
 					{#each TURRET_SIZES as size}
 						<th>
 							<span>{size}</span>
-							<SortButton bind:orderBy prop="turrets.{size}" />
+							<SortButton bind:orderBy={$params.order} prop="turrets.{size}" />
 						</th>
 					{/each}
 				{/if}
-				{#if cargoIsCompact}
+				{#if !$params.expand.cargo}
 					<th />
 				{:else}
 					{#each CARGO_TYPES as type}
 						<th>
 							<span>{CARGO_NAMES[type]}</span>
-							<SortButton bind:orderBy prop="cargo.{type}" />
+							<SortButton bind:orderBy={$params.order} prop="cargo.{type}" />
 						</th>
 					{/each}
 				{/if}
-				{#if docksIsCompact}
+				{#if !$params.expand.docks}
 					<th />
 				{:else}
 					{#each DOCK_SIZES as size}
 						<th>
 							<span>{size}</span>
-							<SortButton bind:orderBy prop="docks.{size}" />
+							<SortButton bind:orderBy={$params.order} prop="docks.{size}" />
 						</th>
 					{/each}
 				{/if}
-				{#if hangarIsCompact}
+				{#if !$params.expand.hangars}
 					<th />
 				{:else}
 					{#each HANGER_SIZES as size}
 						<th>
 							<span>{size}</span>
-							<SortButton bind:orderBy prop="hangars.{size}" />
+							<SortButton bind:orderBy={$params.order} prop="hangars.{size}" />
 						</th>
 					{/each}
 				{/if}
@@ -455,7 +370,7 @@
 					<td>{ship.size}</td>
 					<td>{ship.purpose}</td>
 					<td>{ship.type}</td>
-					{#if engineIsCompact}
+					{#if !$params.expand.engines}
 						<td>
 							{#each Object.entries(ship.engines) as [size, total]}
 								<span class="badge text-bg-green me-2">{total} {size}</span>
@@ -468,7 +383,7 @@
 							</td>
 						{/each}
 					{/if}
-					{#if shieldIsCompact}
+					{#if !$params.expand.shields}
 						<td>
 							{#each Object.entries(ship.shields) as [size, total]}
 								<span class="badge text-bg-primary me-2">{total} {size}</span>
@@ -481,7 +396,7 @@
 							</td>
 						{/each}
 					{/if}
-					{#if weaponIsCompact}
+					{#if !$params.expand.weapons}
 						<td>
 							{#each Object.entries(ship.weapons) as [size, total]}
 								<span class="badge text-bg-red me-2">{total} {size}</span>
@@ -494,7 +409,7 @@
 							</td>
 						{/each}
 					{/if}
-					{#if turretIsCompact}
+					{#if !$params.expand.turrets}
 						<td>
 							{#each Object.entries(ship.turrets) as [size, total]}
 								<span class="badge text-bg-pink me-2">{total} {size}</span>
@@ -507,7 +422,7 @@
 							</td>
 						{/each}
 					{/if}
-					{#if cargoIsCompact}
+					{#if !$params.expand.cargo}
 						<td>
 							{#each Object.entries(ship.cargo) as [type, total]}
 								<span class="badge text-bg-light me-2">{total} {CARGO_NAMES[type]}</span>
@@ -518,7 +433,7 @@
 							<td>{ship.cargo[type] || '-'}</td>
 						{/each}
 					{/if}
-					{#if docksIsCompact}
+					{#if !$params.expand.docks}
 						<td>
 							{#each Object.entries(ship.docks) as [size, total]}
 								<span class="badge text-bg-indigo me-2">{total} {size}</span>
@@ -529,7 +444,7 @@
 							<td>{ship.docks[size] ?? '-'}</td>
 						{/each}
 					{/if}
-					{#if hangarIsCompact}
+					{#if !$params.expand.hangars}
 						<td>
 							{#each Object.entries(ship.docks) as [size, total]}
 								<span class="badge text-bg-purple me-2">{total} {size}</span>

@@ -8,7 +8,7 @@
 	export let data: PageData;
 	$: lang = data.lang;
 	$: macro = data.macro;
-	$: props = Object.keys(macro.properties) as (keyof Macro['properties'])[];
+	$: props = Object.keys(macro.properties);
 	$: conns = macro.connections || [];
 	$: duplicates = macro.duplicates;
 </script>
