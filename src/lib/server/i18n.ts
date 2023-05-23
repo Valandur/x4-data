@@ -9,17 +9,18 @@ const REGEX_REF = /{\s*(\d+)\s*,\s*(\d+)\s*}/gi;
 const REGEX_DEFAULT = /(?<!\\)\((.*?)(?<!\\)\)/gi;
 const KNOWN_LANGS: Record<string, string> = {
 	'44': 'en',
-	'49': 'de',
-	'33': 'fr',
-	'39': 'it',
-	'7': 'ru',
-	'34': 'es',
-	'55': 'pt',
-	'48': 'pl',
-	'86': 'zh',
-	'88': 'zh-cht',
-	'82': 'kr',
-	'81': 'jp'
+	'49': 'de'
+	// TODO: Currently disabled
+	// '33': 'fr',
+	// '39': 'it',
+	// '7': 'ru',
+	// '34': 'es',
+	// '55': 'pt',
+	// '48': 'pl',
+	// '86': 'zh',
+	// '88': 'zh-cht',
+	// '82': 'kr',
+	// '81': 'jp'
 };
 
 class I18NService {
@@ -63,8 +64,10 @@ class I18NService {
 		const xmlLangs = xml.languages?.language;
 		if (xmlLangs) {
 			for (const xmlLang of xmlLangs) {
-				const shortCode = KNOWN_LANGS[xmlLang.id] ?? xmlLang.id;
-				this.languages.set(shortCode, xmlLang.name);
+				const shortCode = KNOWN_LANGS[xmlLang.id];
+				if (shortCode) {
+					this.languages.set(shortCode, xmlLang.name);
+				}
 			}
 
 			return;
@@ -75,7 +78,10 @@ class I18NService {
 		}
 
 		const id = xml.language.id;
-		const shortCode = KNOWN_LANGS[id] ?? id;
+		const shortCode = KNOWN_LANGS[id];
+		if (!shortCode) {
+			return;
+		}
 
 		const ts: Map<string, string> = new Map();
 		for (const page of xml.language.page) {
