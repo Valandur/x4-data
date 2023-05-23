@@ -6,7 +6,7 @@ export enum Size {
 	XL = 'XL'
 }
 
-export const SIZES = Object.keys(Size);
+export const SIZES = Object.values(Size);
 
 export enum CargoType {
 	CONDENSATE = 'CONDENSATE',
@@ -15,4 +15,4 @@ export enum CargoType {
 	SOLID = 'SOLID'
 }
 
-export const CARGO_TYPES = Object.keys(CargoType);
+export const CARGO_TYPES = Object.values(CargoType);

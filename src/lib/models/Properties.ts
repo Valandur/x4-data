@@ -11,6 +11,7 @@ export interface Properties {
 	identification?: PropertyIdentification;
 	missle?: PropertyMissle;
 	people?: PropertyPeople;
+	physics?: PropertyPhysics;
 	purpose?: PropertyPurpose;
 	reload?: PropertyReload;
 	rotationacceleration?: PropertyRotationAcceleration;
@@ -103,6 +104,24 @@ export interface PropertyMissle {
 
 export interface PropertyPeople {
 	capacity: number;
+}
+
+export interface PropertyPhysics {
+	mass: number;
+	inertia: {
+		pitch: number;
+		yaw: number;
+		roll: number;
+	};
+	drag: {
+		forward: number;
+		reverse: number;
+		horizontal: number;
+		vertical: number;
+		pitch: number;
+		yaw: number;
+		roll: number;
+	};
 }
 
 export interface PropertyPurpose {

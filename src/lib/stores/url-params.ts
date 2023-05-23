@@ -21,11 +21,13 @@ interface UrlParamArray {
 	type: 'array';
 	name: string;
 	default: string[];
+	invert?: boolean;
 }
 interface UrlParamFlags {
 	type: 'flags';
 	name: string;
-	flags: Record<string, { name: string; default: boolean }>;
+	flags: Record<string, { name: string; default: boolean; invert?: boolean }>;
+	invert?: boolean;
 }
 type UrlParamWithType = UrlParamNumber | UrlParamString | UrlParamArray | UrlParamFlags;
 
@@ -58,16 +60,25 @@ export function trackUrlParams<T extends UrlParams = UrlParams>(initParams: T) {
 				params[key] = { type: 'string', name: param.name, default: param.default };
 				defaults[key] = param.default;
 			} else if (Array.isArray(param.default)) {
-				params[key] = { type: 'array', name: param.name, default: param.default };
-				defaults[key] = param.default;
+				const invert = 'invert' in param && param.invert;
+				params[key] = {
+					type: 'array',
+					name: param.name,
+					default: param.default,
+					invert: invert
+				};
+				defaults[key] = invert ? [] : param.default;
 			}
 		} else if ('flags' in param) {
-			const flags: Record<string, boolean> = {};
+			params[key] = { type: 'flags', name: param.name, flags: param.flags, invert: param.invert };
+			const defaultFlags: Record<string, boolean> = {};
 			for (const [flagKey, flag] of Object.entries(param.flags)) {
-				flags[flagKey] = flag.default;
+				defaultFlags[flagKey] = flag.invert ? !flag.default : flag.default;
+				if (param.invert) {
+					defaultFlags[flagKey] = !defaultFlags[flagKey];
+				}
 			}
-			params[key] = { type: 'flags', name: param.name, flags: param.flags };
-			defaults[key] = flags;
+			defaults[key] = defaultFlags;
 		}
 	}
 	const { subscribe, set } = writable<UrlParamValues<T>>(defaults as UrlParamValues<T>);
@@ -99,7 +110,11 @@ export function trackUrlParams<T extends UrlParams = UrlParams>(initParams: T) {
 					urlParams.delete(param.name);
 				}
 			} else if (param.type === 'array') {
-				const val = value as string[];
+				let val = value as string[];
+				if (param.invert) {
+					val = param.default.filter((d) => !val.includes(d));
+				}
+
 				if (val.length > 0) {
 					urlParams.set(param.name, val.join(PARAM_SEP));
 				} else {
@@ -107,8 +122,14 @@ export function trackUrlParams<T extends UrlParams = UrlParams>(initParams: T) {
 				}
 			} else if (param.type === 'flags') {
 				const bools = value as Record<string, boolean>;
+				if (param.invert) {
+					for (const flagKey of Object.keys(param.flags)) {
+						bools[flagKey] = !bools[flagKey];
+					}
+				}
+
 				const str = Object.keys(bools)
-					.filter((bKey) => bools[bKey])
+					.filter((bKey) => (param.flags[bKey].invert ? !bools[bKey] : bools[bKey]))
 					.map((bKey) => param.flags[bKey].name)
 					.join('');
 				if (str.length > 0) {
@@ -142,12 +163,25 @@ export function trackUrlParams<T extends UrlParams = UrlParams>(initParams: T) {
 					} else if (param.type === 'string') {
 						values[key] = value;
 					} else if (param.type === 'array') {
-						values[key] = value.split(PARAM_SEP);
+						let vals = value.split(PARAM_SEP);
+						if (param.invert) {
+							vals = param.default.filter((d) => !vals.includes(d));
+						}
+						values[key] = vals;
 					} else if (param.type === 'flags') {
 						const flags: Record<string, boolean> = {};
 						for (const [flagKey, flag] of Object.entries(param.flags)) {
 							if (value.includes(flag.name)) {
 								flags[flagKey] = true;
+							} else {
+								flags[flagKey] = false;
+							}
+
+							if (flag.invert) {
+								flags[flagKey] = !flags[flagKey];
+							}
+							if (param.invert) {
+								flags[flagKey] = !flags[flagKey];
 							}
 						}
 						values[key] = flags;

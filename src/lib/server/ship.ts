@@ -3,7 +3,7 @@ import { mkdir, stat, writeFile } from 'node:fs/promises';
 import chalk from 'chalk';
 import superagent from 'superagent';
 
-import { Size } from '$lib/models/Constants';
+import { CargoType, SIZES, Size } from '$lib/models/Constants';
 import type { Macro } from '$lib/models/Macro';
 import type { Ship } from '$lib/models/Ship';
 
@@ -28,7 +28,7 @@ class ShipService {
 		return false;
 	}
 
-	public async process(fileName: string, xml: any): Promise<void> {
+	public async process(/* fileName: string, xml: any */): Promise<void> {
 		// NO-OP
 	}
 
@@ -66,13 +66,18 @@ class ShipService {
 			return null;
 		}
 
-		const engines: Record<string, number> = {};
-		const shields: Record<string, number> = {};
-		const weapons: Record<string, number> = {};
-		const turrets: Record<string, number> = {};
-		const cargo: Record<string, number> = {};
-		const docks: Record<string, number> = {};
-		const hangars: Record<string, number> = {};
+		const engines = this.emptyStatsPerSize();
+		const shields = this.emptyStatsPerSize();
+		const weapons = this.emptyStatsPerSize();
+		const turrets = this.emptyStatsPerSize();
+		const docks = this.emptyStatsPerSize();
+		const hangars = this.emptyStatsPerSize();
+		const cargo: Record<CargoType, number> = {
+			[CargoType.CONDENSATE]: 0,
+			[CargoType.CONTAINER]: 0,
+			[CargoType.LIQUID]: 0,
+			[CargoType.SOLID]: 0
+		};
 
 		const otherMacros = macro.connections.map((c) =>
 			'resolved' in c && c.resolved ? c.resolved : null
@@ -92,17 +97,17 @@ class ShipService {
 
 					const size = tag.substring(5).toUpperCase() as Size;
 					if (otherMacro.properties.dock?.external) {
-						docks[size] = (docks[size] ?? 0) + 1;
+						docks[size] = docks[size] + 1;
 					} else if (otherMacro.properties.dock?.storage) {
-						hangars[size] = (hangars[size] ?? 0) + (otherMacro.properties.dock.capacity ?? 0);
+						hangars[size] = hangars[size] + (otherMacro.properties.dock.capacity ?? 0);
 					}
 				}
 			}
 
 			const cargoTypes = otherMacro.properties.cargo?.tags.toUpperCase().split(' ');
 			if (cargoTypes) {
-				for (const type of cargoTypes) {
-					cargo[type] = (cargo[type] ?? 0) + (otherMacro.properties.cargo?.max ?? 0);
+				for (const type of cargoTypes as CargoType[]) {
+					cargo[type] = cargo[type] + (otherMacro.properties.cargo?.max ?? 0);
 				}
 			}
 
@@ -133,13 +138,13 @@ class ShipService {
 				}
 
 				if (tags.includes('engine')) {
-					engines[size] = (engines[size] ?? 0) + 1;
+					engines[size] = engines[size] + 1;
 				} else if (tags.includes('shield')) {
-					shields[size] = (shields[size] ?? 0) + 1;
+					shields[size] = shields[size] + 1;
 				} else if (tags.includes('weapon')) {
-					weapons[size] = (weapons[size] ?? 0) + 1;
+					weapons[size] = weapons[size] + 1;
 				} else if (tags.includes('turret')) {
-					turrets[size] = (turrets[size] ?? 0) + 1;
+					turrets[size] = turrets[size] + 1;
 				}
 			}
 		}
@@ -156,6 +161,16 @@ class ShipService {
 			await writeFile(imgFileName, resImg.body);
 		}
 
+		const mass = macro.properties.physics?.mass ?? 0;
+		const drag = macro.properties.physics?.drag.forward ?? 0;
+		const dragPerEngine = this.emptyStatsPerSize();
+		for (const size of SIZES) {
+			const ratio = drag / engines[size];
+			if (isFinite(ratio)) {
+				dragPerEngine[size] = ratio;
+			}
+		}
+
 		return {
 			class: macro.class,
 			name: name,
@@ -163,8 +178,11 @@ class ShipService {
 			type: macro.properties.ship.type,
 			purpose: macro.properties.purpose.primary,
 			ident: macro.properties.identification.name,
-			crew: macro.properties.people?.capacity,
-			hull: macro.properties.hull?.max,
+			crew: macro.properties.people?.capacity ?? 0,
+			hull: macro.properties.hull?.max ?? 0,
+			mass: macro.properties.physics?.mass ?? 0,
+			timeToMaxSpeed: mass / drag,
+			dragPerEngine,
 			engines,
 			shields,
 			weapons,
@@ -172,6 +190,16 @@ class ShipService {
 			cargo,
 			docks,
 			hangars
+		};
+	}
+
+	private emptyStatsPerSize(): Record<Size, number> {
+		return {
+			[Size.XS]: 0,
+			[Size.S]: 0,
+			[Size.M]: 0,
+			[Size.L]: 0,
+			[Size.XL]: 0
 		};
 	}
 
