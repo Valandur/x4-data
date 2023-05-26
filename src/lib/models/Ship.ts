@@ -9,14 +9,14 @@ export interface Ship {
 	ident: string;
 	crew: number;
 	hull: number;
-	mass: number;
 	timeToMaxSpeed: number;
 	engines: Record<Size, number>;
-	dragPerEngine: Record<Size, number>;
 	shields: Record<Size, number>;
 	weapons: Record<Size, number>;
 	turrets: Record<Size, number>;
 	docks: Record<Size, number>;
 	hangars: Record<Size, number>;
 	cargo: Record<CargoType, number>;
+	massPerEngine: Record<Size, number>;
+	dragPerEngine: Record<Size, number>;
 }

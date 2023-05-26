@@ -1,8 +1,9 @@
 import { onDestroy } from 'svelte';
 import { writable } from 'svelte/store';
 
-import { afterNavigate, goto } from '$app/navigation';
+import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
+import { page } from '$app/stores';
 
 const PARAM_SEP = '_';
 const SAVE_DELAY = 500;
@@ -81,7 +82,8 @@ export function trackUrlParams<T extends UrlParams = UrlParams>(initParams: T) {
 			defaults[key] = defaultFlags;
 		}
 	}
-	const { subscribe, set } = writable<UrlParamValues<T>>(defaults as UrlParamValues<T>);
+
+	const { subscribe, set } = writable<UrlParamValues<T>>({ ...defaults } as UrlParamValues<T>);
 
 	const paramEntries = Object.entries(params);
 	let navTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -93,7 +95,7 @@ export function trackUrlParams<T extends UrlParams = UrlParams>(initParams: T) {
 		}
 	}
 
-	function toURLSearchParams(values: UrlParamValues<T>, others?: URLSearchParams) {
+	function toURLSearchParams(values: UrlParamValues<T>, others?: URLSearchParams): URLSearchParams {
 		const urlParams = new URLSearchParams(others);
 		for (const [key, param] of paramEntries) {
 			const value = values[key];
@@ -139,64 +141,69 @@ export function trackUrlParams<T extends UrlParams = UrlParams>(initParams: T) {
 				}
 			}
 		}
-		return urlParams.toString();
+		return urlParams;
+	}
+
+	function fromUrlSearchParams(urlParams: URLSearchParams): UrlParamValues<T> {
+		const values: Record<string, unknown> = { ...defaults };
+
+		for (const [key, param] of paramEntries) {
+			const value = urlParams.get(param.name);
+			if (value === null) {
+				continue;
+			}
+
+			if (param.type === 'number') {
+				values[key] = Number(value);
+			} else if (param.type === 'string') {
+				values[key] = value;
+			} else if (param.type === 'array') {
+				let vals = value.split(PARAM_SEP);
+				if (param.invert) {
+					vals = param.default.filter((d) => !vals.includes(d));
+				}
+				values[key] = vals;
+			} else if (param.type === 'flags') {
+				const flags: Record<string, boolean> = {};
+				for (const [flagKey, flag] of Object.entries(param.flags)) {
+					if (value.includes(flag.name)) {
+						flags[flagKey] = true;
+					} else {
+						flags[flagKey] = false;
+					}
+
+					if (flag.invert) {
+						flags[flagKey] = !flags[flagKey];
+					}
+					if (param.invert) {
+						flags[flagKey] = !flags[flagKey];
+					}
+				}
+				values[key] = flags;
+			}
+		}
+
+		return values as UrlParamValues<T>;
 	}
 
 	if (browser) {
 		let oldSearch = '';
 
-		afterNavigate((nav) => {
-			const urlParams = nav.to?.url.searchParams;
+		const unsubPage = page.subscribe(({ url }) => {
+			const urlParams = url.searchParams;
 			const search = urlParams?.toString();
 
-			if (urlParams && search && search !== oldSearch) {
-				const values: Record<string, unknown> = defaults;
-
-				for (const [key, param] of paramEntries) {
-					const value = urlParams.get(param.name);
-					if (value === null) {
-						continue;
-					}
-
-					if (param.type === 'number') {
-						values[key] = Number(value);
-					} else if (param.type === 'string') {
-						values[key] = value;
-					} else if (param.type === 'array') {
-						let vals = value.split(PARAM_SEP);
-						if (param.invert) {
-							vals = param.default.filter((d) => !vals.includes(d));
-						}
-						values[key] = vals;
-					} else if (param.type === 'flags') {
-						const flags: Record<string, boolean> = {};
-						for (const [flagKey, flag] of Object.entries(param.flags)) {
-							if (value.includes(flag.name)) {
-								flags[flagKey] = true;
-							} else {
-								flags[flagKey] = false;
-							}
-
-							if (flag.invert) {
-								flags[flagKey] = !flags[flagKey];
-							}
-							if (param.invert) {
-								flags[flagKey] = !flags[flagKey];
-							}
-						}
-						values[key] = flags;
-					}
-				}
-
+			if (urlParams && typeof search === 'string' && search !== oldSearch) {
+				const values = fromUrlSearchParams(urlParams);
 				oldSearch = search;
 				set(values as UrlParamValues<T>);
 			}
 		});
 
-		const unsub = subscribe((newValues) => {
+		const unsubValues = subscribe((newValues) => {
 			clearNavTimeout();
 			navTimeout = setTimeout(() => {
-				const newSearch = toURLSearchParams(newValues);
+				const newSearch = toURLSearchParams(newValues).toString();
 				if (newSearch !== oldSearch) {
 					oldSearch = newSearch;
 					goto(`?${newSearch}`, { keepFocus: true, noScroll: true });
@@ -204,7 +211,11 @@ export function trackUrlParams<T extends UrlParams = UrlParams>(initParams: T) {
 			}, SAVE_DELAY);
 		});
 
-		onDestroy(unsub);
+		onDestroy(() => {
+			clearNavTimeout();
+			unsubPage();
+			unsubValues();
+		});
 	}
 
 	return {

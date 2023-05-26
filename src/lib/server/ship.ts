@@ -162,6 +162,14 @@ class ShipService {
 		}
 
 		const mass = macro.properties.physics?.mass ?? 0;
+		const massPerEngine = this.emptyStatsPerSize();
+		for (const size of SIZES) {
+			const ratio = mass / engines[size];
+			if (isFinite(ratio)) {
+				massPerEngine[size] = ratio;
+			}
+		}
+
 		const drag = macro.properties.physics?.drag.forward ?? 0;
 		const dragPerEngine = this.emptyStatsPerSize();
 		for (const size of SIZES) {
@@ -180,9 +188,9 @@ class ShipService {
 			ident: macro.properties.identification.name,
 			crew: macro.properties.people?.capacity ?? 0,
 			hull: macro.properties.hull?.max ?? 0,
-			mass: macro.properties.physics?.mass ?? 0,
 			timeToMaxSpeed: mass / drag,
 			dragPerEngine,
+			massPerEngine,
 			engines,
 			shields,
 			weapons,

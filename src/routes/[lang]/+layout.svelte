@@ -62,71 +62,70 @@
 
 <svelte:window bind:scrollY />
 
-<header id="header" class="app-header {$settings.darkTheme}">
-	<div id="header" class="app-header">
-		<div class="desktop-toggler">
-			<button type="button" class="menu-toggler" on:click={() => onToggleCollapse(false)}>
-				<span class="bar" />
-				<span class="bar" />
-				<span class="bar" />
-			</button>
-		</div>
+<div id="header" class="app-header">
+	<div class="desktop-toggler">
+		<button type="button" class="menu-toggler" on:click={() => onToggleCollapse(false)}>
+			<span class="bar" />
+			<span class="bar" />
+			<span class="bar" />
+		</button>
+	</div>
 
-		<div class="mobile-toggler">
-			<button type="button" class="menu-toggler" on:click={() => onToggleCollapse(true)}>
-				<span class="bar" />
-				<span class="bar" />
-				<span class="bar" />
-			</button>
-		</div>
+	<div class="mobile-toggler">
+		<button type="button" class="menu-toggler" on:click={() => onToggleCollapse(true)}>
+			<span class="bar" />
+			<span class="bar" />
+			<span class="bar" />
+		</button>
+	</div>
 
-		<div class="brand">
-			<a href="/" class="brand-logo">
-				<span class="brand-img">
-					<span class="brand-img-text text-theme">X</span>
-				</span>
-				<span class="brand-text">X4 Data</span>
-			</a>
-		</div>
+	<div class="brand">
+		<a href="/" class="brand-logo">
+			<span class="brand-img">
+				<span class="brand-img-text text-theme">X</span>
+			</span>
+			<span class="brand-text">X4 Data</span>
+		</a>
+	</div>
 
-		<div class="menu">
-			<div class="menu-item me-1">
-				<div class="form-switch">
-					<input
-						type="checkbox"
-						class="form-check-input me-1"
-						id="customSwitch1"
-						bind:checked={$settings.darkTheme}
-					/>
-					<label class="form-check-label" for="customSwitch1">
-						<i class="fa-solid fa-moon" />
-					</label>
-				</div>
-			</div>
-
-			<div
-				class="menu-item dropdown dropdown-mobile-full"
-				use:clickOutside
-				on:outclick={() => (dropdownLangs = false)}
-			>
-				<button class="btn menu-link" on:click={() => (dropdownLangs = !dropdownLangs)}>
-					<div class="menu-text">{data.langName}</div>
-				</button>
-				<div class="dropdown-menu me-sm-1 mt-1 top-100 end-0" class:show={dropdownLangs}>
-					{#each langs as [key, name]}
-						<a
-							class="dropdown-item d-flex align-items-center"
-							href="/{key}{pathAndSearch}"
-							on:click={() => (dropdownLangs = false)}
-						>
-							{name}
-						</a>
-					{/each}
-				</div>
+	<div class="menu">
+		<div class="menu-item me-1">
+			<div class="form-switch">
+				<input
+					type="checkbox"
+					class="form-check-input me-1"
+					id="customSwitch1"
+					bind:checked={$settings.darkTheme}
+				/>
+				<label class="form-check-label" for="customSwitch1">
+					<i class="fa-solid fa-moon" />
+				</label>
 			</div>
 		</div>
 
-		<!--<form class="menu-search" method="POST" name="header_search_form">
+		<div
+			class="menu-item dropdown dropdown-mobile-full"
+			use:clickOutside
+			on:outclick={() => (dropdownLangs = false)}
+		>
+			<button class="btn menu-link" on:click={() => (dropdownLangs = !dropdownLangs)}>
+				<div class="menu-text">{data.langName}</div>
+			</button>
+			<div class="dropdown-menu me-sm-1 mt-1 top-100 end-0" class:show={dropdownLangs}>
+				{#each langs as [key, name]}
+					<a
+						class="dropdown-item d-flex align-items-center"
+						href="/{key}{pathAndSearch}"
+						on:click={() => (dropdownLangs = false)}
+					>
+						{name}
+					</a>
+				{/each}
+			</div>
+		</div>
+	</div>
+
+	<!--<form class="menu-search" method="POST" name="header_search_form">
 			<div class="menu-search-container">
 				<div class="menu-search-icon"><i class="bi bi-search" /></div>
 				<div class="menu-search-input">
@@ -143,8 +142,7 @@
 				</div>
 			</div>
 		</form>-->
-	</div>
-</header>
+</div>
 
 <sidebar id="sidebar" class="app-sidebar">
 	<div id="sidebar" class="app-sidebar">

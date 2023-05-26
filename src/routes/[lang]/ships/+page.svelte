@@ -1,26 +1,9 @@
 <script lang="ts">
-	import { CARGO_TYPES, SIZES, Size } from '$lib/models/Constants';
 	import { trackUrlParams } from '$lib/stores/url-params';
-	import SortButton from '$lib/components/SortButton.svelte';
+	import OrderButton from '$lib/components/OrderButton.svelte';
+	import Hint from '$lib/components/Hint.svelte';
 
 	import type { PageData } from './$types';
-
-	const ENGINE_SIZES = SIZES;
-	const SHIELD_SIZES = [Size.S, Size.M, Size.L, Size.XL];
-	const WEAPON_SIZES = SIZES;
-	const TURRET_SIZES = [Size.S, Size.M, Size.L];
-	const DOCK_SIZES = [Size.S, Size.M];
-	const HANGER_SIZES = [Size.XS, Size.S, Size.M];
-	const CARGO_NAMES: Record<string, string> = {
-		CONTAINER: 'CT',
-		CONDENSATE: 'CS',
-		LIQUID: 'L',
-		SOLID: 'S'
-	};
-	const COL_NAMES: Record<string, string> = {
-		timeToMaxSpeed: 'Time to Max Speed (TtMS)',
-		dragPerEngine: 'Drag per Engine (DpE)'
-	};
 
 	export let data: PageData;
 
@@ -33,7 +16,7 @@
 				purpose: { name: 'p', default: false, invert: true },
 				role: { name: 'r', default: false, invert: true },
 				engines: { name: 'e', default: false, invert: true },
-				shields: { name: 's', default: false, invert: true },
+				shields: { name: 'l', default: false, invert: true },
 				weapons: { name: 'w', default: false, invert: true },
 				turrets: { name: 't', default: false, invert: true },
 				cargo: { name: 'a', default: false, invert: true },
@@ -41,8 +24,8 @@
 				hangars: { name: 'h', default: false, invert: true },
 				crew: { name: 'c', default: false, invert: true },
 				hull: { name: 'u', default: false, invert: true },
-				mass: { name: 'm', default: false, invert: true },
 				timeToMaxSpeed: { name: 'x', default: false, invert: true },
+				massPerEngine: { name: 'm', default: false, invert: true },
 				dragPerEngine: { name: 'd', default: false, invert: true }
 			}
 		},
@@ -61,11 +44,14 @@
 				cargo: { name: 'c', default: false },
 				docks: { name: 'd', default: false },
 				hangars: { name: 'h', default: false },
+				mass: { name: 'm', default: false },
 				drag: { name: 'r', default: false }
 			}
 		}
 	});
 
+	$: names = data.names;
+	$: enums = data.enums;
 	$: columns = Object.keys($params.cols) as (keyof typeof $params.cols)[];
 	$: lowerText = $params.text.toLocaleLowerCase();
 	$: filteredShips = data.ships
@@ -98,6 +84,21 @@
 					return -1;
 				} else if (typeof valueA === 'string' && typeof valueB === 'string') {
 					comp = neg ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
+				} else if (typeof valueA === 'object' && typeof valueB === 'object') {
+					const totalA = Object.values(valueA).reduce(
+						(acc: number, curr) => acc + (typeof curr === 'number' ? curr : 0),
+						0
+					);
+					const totalB = Object.values(valueB).reduce(
+						(acc: number, curr) => acc + (typeof curr === 'number' ? curr : 0),
+						0
+					);
+					if (!totalA && totalB) {
+						return 1;
+					} else if (totalA && !totalB) {
+						return -1;
+					}
+					comp = neg ? totalB - totalA : totalA - totalB;
 				} else {
 					comp = neg ? valueB - valueA : valueA - valueB;
 				}
@@ -107,12 +108,6 @@
 			}
 			return shipA.ident.localeCompare(shipB.ident);
 		});
-
-	function orderToTag(order: string) {
-		const parts = (order.startsWith('-') ? order.substring(1) : order).split('.');
-		const name = COL_NAMES[parts[0]] ?? parts[0][0].toLocaleUpperCase() + parts[0].substring(1);
-		return `${name} • ${parts[1]}`;
-	}
 </script>
 
 <h1>Ships</h1>
@@ -124,7 +119,7 @@
 		<div class="col-4">
 			<div class="small text-inverse text-opacity-50 mb-1"><b class="fw-bold">Size</b></div>
 			<div class="form-group mb-3">
-				{#each SIZES as size}
+				{#each enums.ships as size}
 					<div class="form-check-inline">
 						<input
 							id="size{size}CheckBox"
@@ -139,6 +134,7 @@
 				{/each}
 			</div>
 		</div>
+
 		<div class="col">
 			<div class="form-group mb-3">
 				<div class="input-group flex-nowrap">
@@ -161,11 +157,12 @@
 			</div>
 		</div>
 	</div>
+
 	<div class="row">
 		<div class="col">
 			<div class="small text-inverse text-opacity-50 mb-1"><b class="fw-bold">Purpose</b></div>
 			<div class="form-group mb-3">
-				{#each data.purposes as purpose}
+				{#each enums.purposes as purpose}
 					<div class="form-check-inline">
 						<input
 							id="purpose{purpose}CheckBox"
@@ -184,7 +181,7 @@
 		<div class="col-9">
 			<div class="small text-inverse text-opacity-50 mb-1"><b class="fw-bold">Role</b></div>
 			<div class="form-group mb-3">
-				{#each data.roles as role}
+				{#each enums.roles as role}
 					<div class="form-check-inline">
 						<input
 							id="role{role}CheckBox"
@@ -200,6 +197,7 @@
 			</div>
 		</div>
 	</div>
+
 	<div class="row">
 		<div class="col">
 			<div class="small text-inverse text-opacity-50 mb-1"><b class="fw-bold">Columns</b></div>
@@ -214,7 +212,7 @@
 							bind:checked={$params.cols[column]}
 						/>
 						<label class="form-check-label" for="col{column}CheckBox">
-							{COL_NAMES[column] ?? column[0].toLocaleUpperCase() + column.substring(1)}
+							{names.columns[column] ?? column[0].toLocaleUpperCase() + column.substring(1)}
 						</label>
 					</div>
 				{/each}
@@ -226,17 +224,25 @@
 			{#if $params.order.length > 0}
 				<div class="form-group mb-3">
 					{#each $params.order as order}
-						<button
-							class="btn btn-warning me-2"
-							on:click={() => ($params.order = $params.order.filter((o) => o !== order))}
+						{@const isDescending = order.startsWith('-')}
+						{@const text = (isDescending ? order.substring(1) : order)
+							.split('.')
+							.map((order) => names.columns[order] ?? order)
+							.join(' • ')}
+						<OrderButton
+							bind:orderBy={$params.order}
+							prop={isDescending ? order.substring(1) : order}
+							showDelete
+							clazz="me-1 mb-1"
 						>
-							<i class="fa-solid fa-arrow-{order.startsWith('-') ? 'down' : 'up'}" />
-							<span class="mx-2">
-								{orderToTag(order)}
-							</span>
-							<i class="fa-solid fa-x" />
-						</button>
+							<div class="capitalize d-inline-block">
+								{text}
+							</div>
+						</OrderButton>
 					{/each}
+					<button class="btn btn-sm btn-danger mb-1" on:click={() => ($params.order = [])}>
+						<i class="fa-solid fa-trash" />
+					</button>
 				</div>
 			{:else}
 				<p class="text-secondary">(Click a column header to order by that column)</p>
@@ -246,171 +252,207 @@
 </div>
 
 <div class="table-responsive">
-	<table id="table-ships" class="table table-striped table-hover">
-		<thead class="table-light">
+	<table id="table-ships" class="table table-striped table-bordered table-hover">
+		<thead class="table-dark">
 			<tr>
 				{#if $params.cols.image}
 					<th style:width="100px" />
 				{/if}
 
 				<th>
-					<span>Name</span>
-					<SortButton bind:orderBy={$params.order} prop="ident" />
+					<OrderButton bind:orderBy={$params.order} prop="ident" ascending>Name</OrderButton>
 				</th>
 
 				{#if $params.cols.size}
 					<th>
-						<span>Size</span>
-						<SortButton bind:orderBy={$params.order} prop="size" />
+						<OrderButton bind:orderBy={$params.order} prop="size">Size</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.purpose}
 					<th>
-						<span>Purpose</span>
-						<SortButton bind:orderBy={$params.order} prop="purpose" />
+						<OrderButton bind:orderBy={$params.order} prop="purpose">Purpose</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.role}
 					<th>
-						<span>Role</span>
-						<SortButton bind:orderBy={$params.order} prop="type" />
+						<OrderButton bind:orderBy={$params.order} prop="type">Role</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.engines}
-					<th colSpan={$params.expand.engines ? ENGINE_SIZES.length : 1}>
-						<span>Engines</span>
-						<button
-							type="button"
-							class="btn btn-sm btn-primary ms-2"
-							on:click={() => ($params.expand.engines = !$params.expand.engines)}
-						>
-							<i class="fa-solid fa-{$params.expand.engines ? 'minus' : 'plus'}" />
-						</button>
+					<th colSpan={$params.expand.engines ? enums.engines.length : 1}>
+						<OrderButton bind:orderBy={$params.order} prop="engines">
+							Engines
+							<svelte:fragment slot="attach">
+								<button
+									type="button"
+									class="btn btn-sm btn-secondary"
+									on:click={() => ($params.expand.engines = !$params.expand.engines)}
+								>
+									<i class="fa-solid fa-{$params.expand.engines ? 'minus' : 'plus'}" />
+								</button>
+							</svelte:fragment>
+						</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.shields}
-					<th colSpan={$params.expand.shields ? SHIELD_SIZES.length : 1}>
-						<span>Shields</span>
-						<button
-							type="button"
-							class="btn btn-sm btn-primary ms-2"
-							on:click={() => ($params.expand.shields = !$params.expand.shields)}
-						>
-							<i class="fa-solid fa-{$params.expand.shields ? 'minus' : 'plus'}" />
-						</button>
+					<th colSpan={$params.expand.shields ? enums.shields.length : 1}>
+						<OrderButton bind:orderBy={$params.order} prop="shields">
+							Shields
+							<svelte:fragment slot="attach">
+								<button
+									type="button"
+									class="btn btn-sm btn-secondary"
+									on:click={() => ($params.expand.shields = !$params.expand.shields)}
+								>
+									<i class="fa-solid fa-{$params.expand.shields ? 'minus' : 'plus'}" />
+								</button>
+							</svelte:fragment>
+						</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.weapons}
-					<th colSpan={$params.expand.weapons ? WEAPON_SIZES.length : 1}>
-						<span>Weapons</span>
-						<button
-							type="button"
-							class="btn btn-sm btn-primary ms-2"
-							on:click={() => ($params.expand.weapons = !$params.expand.weapons)}
-						>
-							<i class="fa-solid fa-{$params.expand.weapons ? 'minus' : 'plus'}" />
-						</button>
+					<th colSpan={$params.expand.weapons ? enums.weapons.length : 1}>
+						<OrderButton bind:orderBy={$params.order} prop="weapons">
+							Weapons
+							<svelte:fragment slot="attach">
+								<button
+									type="button"
+									class="btn btn-sm btn-secondary"
+									on:click={() => ($params.expand.weapons = !$params.expand.weapons)}
+								>
+									<i class="fa-solid fa-{$params.expand.weapons ? 'minus' : 'plus'}" />
+								</button>
+							</svelte:fragment>
+						</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.turrets}
-					<th colSpan={$params.expand.turrets ? TURRET_SIZES.length : 1}>
-						<span>Turrets</span>
-						<button
-							type="button"
-							class="btn btn-sm btn-primary ms-2"
-							on:click={() => ($params.expand.turrets = !$params.expand.turrets)}
-						>
-							<i class="fa-solid fa-{$params.expand.turrets ? 'minus' : 'plus'}" />
-						</button>
+					<th colSpan={$params.expand.turrets ? enums.turrets.length : 1}>
+						<OrderButton bind:orderBy={$params.order} prop="turrets">
+							Turrets
+							<svelte:fragment slot="attach">
+								<button
+									type="button"
+									class="btn btn-sm btn-secondary"
+									on:click={() => ($params.expand.turrets = !$params.expand.turrets)}
+								>
+									<i class="fa-solid fa-{$params.expand.turrets ? 'minus' : 'plus'}" />
+								</button>
+							</svelte:fragment>
+						</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.cargo}
-					<th colSpan={$params.expand.cargo ? CARGO_TYPES.length : 1}>
-						<span>Cargo</span>
-						<button
-							type="button"
-							class="btn btn-sm btn-primary ms-2"
-							on:click={() => ($params.expand.cargo = !$params.expand.cargo)}
-						>
-							<i class="fa-solid fa-{$params.expand.cargo ? 'minus' : 'plus'}" />
-						</button>
+					<th colSpan={$params.expand.cargo ? enums.cargo.length : 1}>
+						<OrderButton bind:orderBy={$params.order} prop="cargo">
+							Cargo
+							<svelte:fragment slot="attach">
+								<button
+									type="button"
+									class="btn btn-sm btn-secondary"
+									on:click={() => ($params.expand.cargo = !$params.expand.cargo)}
+								>
+									<i class="fa-solid fa-{$params.expand.cargo ? 'minus' : 'plus'}" />
+								</button>
+							</svelte:fragment>
+						</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.docks}
-					<th colSpan={$params.expand.docks ? DOCK_SIZES.length : 1}>
-						<span>Docks</span>
-						<button
-							type="button"
-							class="btn btn-sm btn-primary ms-2"
-							on:click={() => ($params.expand.docks = !$params.expand.docks)}
-						>
-							<i class="fa-solid fa-{$params.expand.docks ? 'minus' : 'plus'}" />
-						</button>
+					<th colSpan={$params.expand.docks ? enums.docks.length : 1}>
+						<OrderButton bind:orderBy={$params.order} prop="docks">
+							Docks
+							<svelte:fragment slot="attach">
+								<button
+									type="button"
+									class="btn btn-sm btn-secondary"
+									on:click={() => ($params.expand.docks = !$params.expand.docks)}
+								>
+									<i class="fa-solid fa-{$params.expand.docks ? 'minus' : 'plus'}" />
+								</button>
+							</svelte:fragment>
+						</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.hangars}
-					<th colSpan={$params.expand.hangars ? HANGER_SIZES.length : 1}>
-						<span>Hangars</span>
-						<button
-							type="button"
-							class="btn btn-sm btn-primary ms-2"
-							on:click={() => ($params.expand.hangars = !$params.expand.hangars)}
-						>
-							<i class="fa-solid fa-{$params.expand.hangars ? 'minus' : 'plus'}" />
-						</button>
+					<th colSpan={$params.expand.hangars ? enums.hangars.length : 1}>
+						<OrderButton bind:orderBy={$params.order} prop="hangars">
+							Hangars
+							<svelte:fragment slot="attach">
+								<button
+									type="button"
+									class="btn btn-sm btn-secondary"
+									on:click={() => ($params.expand.hangars = !$params.expand.hangars)}
+								>
+									<i class="fa-solid fa-{$params.expand.hangars ? 'minus' : 'plus'}" />
+								</button>
+							</svelte:fragment>
+						</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.crew}
 					<th>
-						<span>Crew</span>
-						<SortButton bind:orderBy={$params.order} prop="crew" />
+						<OrderButton bind:orderBy={$params.order} prop="crew">Crew</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.hull}
 					<th>
-						<span>Hull</span>
-						<SortButton bind:orderBy={$params.order} prop="hull" />
-					</th>
-				{/if}
-
-				{#if $params.cols.mass}
-					<th>
-						<span>Mass</span>
-						<SortButton bind:orderBy={$params.order} prop="mass" />
+						<OrderButton bind:orderBy={$params.order} prop="hull">Hull</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.timeToMaxSpeed}
 					<th>
-						<span>TtMS</span>
-						<SortButton bind:orderBy={$params.order} prop="timeToMaxSpeed" />
+						<OrderButton bind:orderBy={$params.order} prop="timeToMaxSpeed">TtMS</OrderButton>
+					</th>
+				{/if}
+
+				{#if $params.cols.massPerEngine}
+					<th colSpan={$params.expand.mass ? enums.engines.length : 1}>
+						<OrderButton bind:orderBy={$params.order} prop="massPerEngine">
+							MpE
+							<svelte:fragment slot="attach">
+								<button
+									type="button"
+									class="btn btn-sm btn-secondary"
+									on:click={() => ($params.expand.mass = !$params.expand.mass)}
+								>
+									<i class="fa-solid fa-{$params.expand.mass ? 'minus' : 'plus'}" />
+								</button>
+							</svelte:fragment>
+						</OrderButton>
 					</th>
 				{/if}
 
 				{#if $params.cols.dragPerEngine}
-					<th colSpan={$params.expand.drag ? ENGINE_SIZES.length : 1}>
-						<span>{$params.expand.drag ? 'Drag per Engine (lower is better)' : 'DpE'}</span>
-						<button
-							type="button"
-							class="btn btn-sm btn-primary ms-2"
-							on:click={() => ($params.expand.drag = !$params.expand.drag)}
-						>
-							<i class="fa-solid fa-{$params.expand.drag ? 'minus' : 'plus'}" />
-						</button>
+					<th colSpan={$params.expand.drag ? enums.engines.length : 1}>
+						<OrderButton bind:orderBy={$params.order} prop="dragPerEngine">
+							DpE
+							<svelte:fragment slot="attach">
+								<button
+									type="button"
+									class="btn btn-sm btn-secondary"
+									on:click={() => ($params.expand.drag = !$params.expand.drag)}
+								>
+									<i class="fa-solid fa-{$params.expand.drag ? 'minus' : 'plus'}" />
+								</button>
+							</svelte:fragment>
+						</OrderButton>
 					</th>
 				{/if}
 			</tr>
+
 			<tr>
 				{#if $params.cols.image}
 					<th />
@@ -433,10 +475,11 @@
 
 				{#if $params.cols.engines}
 					{#if $params.expand.engines}
-						{#each ENGINE_SIZES as size}
+						{#each enums.engines as size}
 							<th>
-								<span>{size}</span>
-								<SortButton bind:orderBy={$params.order} prop="engines.{size}" />
+								<OrderButton bind:orderBy={$params.order} prop="engines.{size}">
+									{size}
+								</OrderButton>
 							</th>
 						{/each}
 					{:else}
@@ -446,10 +489,11 @@
 
 				{#if $params.cols.shields}
 					{#if $params.expand.shields}
-						{#each SHIELD_SIZES as size}
+						{#each enums.shields as size}
 							<th>
-								<span>{size}</span>
-								<SortButton bind:orderBy={$params.order} prop="shields.{size}" />
+								<OrderButton bind:orderBy={$params.order} prop="shields.{size}">
+									{size}
+								</OrderButton>
 							</th>
 						{/each}
 					{:else}
@@ -459,10 +503,11 @@
 
 				{#if $params.cols.weapons}
 					{#if $params.expand.weapons}
-						{#each WEAPON_SIZES as size}
+						{#each enums.weapons as size}
 							<th>
-								<span>{size}</span>
-								<SortButton bind:orderBy={$params.order} prop="weapons.{size}" />
+								<OrderButton bind:orderBy={$params.order} prop="weapons.{size}">
+									{size}
+								</OrderButton>
 							</th>
 						{/each}
 					{:else}
@@ -472,10 +517,11 @@
 
 				{#if $params.cols.turrets}
 					{#if $params.expand.turrets}
-						{#each TURRET_SIZES as size}
+						{#each enums.turrets as size}
 							<th>
-								<span>{size}</span>
-								<SortButton bind:orderBy={$params.order} prop="turrets.{size}" />
+								<OrderButton bind:orderBy={$params.order} prop="turrets.{size}">
+									{size}
+								</OrderButton>
 							</th>
 						{/each}
 					{:else}
@@ -485,23 +531,39 @@
 
 				{#if $params.cols.cargo}
 					{#if $params.expand.cargo}
-						{#each CARGO_TYPES as type}
+						{#each enums.cargo as type}
 							<th>
-								<span>{CARGO_NAMES[type]}</span>
-								<SortButton bind:orderBy={$params.order} prop="cargo.{type}" />
+								<OrderButton bind:orderBy={$params.order} prop="cargo.{type}">
+									{names.cargo[type]}
+								</OrderButton>
 							</th>
 						{/each}
 					{:else}
-						<th />
+						<th>
+							<Hint>
+								<h6>Cargo</h6>
+								<p class="text-muted">More is better</p>
+								<p>The amount of each type of cargo the ship can carry.</p>
+								<table class="table table-smaller table-striped mb-0">
+									{#each enums.cargo as type}
+										<tr>
+											<td>{names.cargo[type]}</td>
+											<td><div class="d-inline-block m-0 p-0 capitalize">{type}</div></td>
+										</tr>
+									{/each}
+								</table>
+							</Hint>
+						</th>
 					{/if}
 				{/if}
 
 				{#if $params.cols.docks}
 					{#if $params.expand.docks}
-						{#each DOCK_SIZES as size}
+						{#each enums.docks as size}
 							<th>
-								<span>{size}</span>
-								<SortButton bind:orderBy={$params.order} prop="docks.{size}" />
+								<OrderButton bind:orderBy={$params.order} prop="docks.{size}">
+									{size}
+								</OrderButton>
 							</th>
 						{/each}
 					{:else}
@@ -511,10 +573,11 @@
 
 				{#if $params.cols.hangars}
 					{#if $params.expand.hangars}
-						{#each HANGER_SIZES as size}
+						{#each enums.hangars as size}
 							<th>
-								<span>{size}</span>
-								<SortButton bind:orderBy={$params.order} prop="hangars.{size}" />
+								<OrderButton bind:orderBy={$params.order} prop="hangars.{size}">
+									{size}
+								</OrderButton>
 							</th>
 						{/each}
 					{:else}
@@ -530,29 +593,72 @@
 					<th />
 				{/if}
 
-				{#if $params.cols.mass}
-					<th />
+				{#if $params.cols.timeToMaxSpeed}
+					<th>
+						<Hint>
+							<h6>Time to Max Speed</h6>
+							<p class="text-muted">Lower is better</p>
+							<p>The amount of time (in seconds) that it takes the ship to reach max speed.</p>
+							<p class="mb-0">
+								More engines give more top speed and more acceleration equally, so this value isn't
+								affected by the type of engines installed.
+							</p>
+						</Hint>
+					</th>
 				{/if}
 
-				{#if $params.cols.timeToMaxSpeed}
-					<th />
+				{#if $params.cols.massPerEngine}
+					{#if $params.expand.mass}
+						{#each enums.engines as size}
+							<th>
+								<OrderButton bind:orderBy={$params.order} prop="massPerEngine.{size}">
+									{size}
+								</OrderButton>
+							</th>
+						{/each}
+					{:else}
+						<th>
+							<Hint>
+								<h6>Mass per Engine</h6>
+								<p class="text-muted">Lower is better</p>
+								<p>The mass of the ship divided by the number of engines.</p>
+								<p class="mb-0">
+									A lower mass along with more engines allows a ship to accelerate faster.
+								</p>
+							</Hint>
+						</th>
+					{/if}
 				{/if}
 
 				{#if $params.cols.dragPerEngine}
 					{#if $params.expand.drag}
-						{#each ENGINE_SIZES as size}
+						{#each enums.engines as size}
 							<th>
-								<span>{size}</span>
-								<SortButton bind:orderBy={$params.order} prop="dragPerEngine.{size}" />
+								<OrderButton bind:orderBy={$params.order} prop="dragPerEngine.{size}">
+									{size}
+								</OrderButton>
 							</th>
 						{/each}
 					{:else}
-						<th />
+						<th>
+							<Hint>
+								<h6>Drag per Engine</h6>
+								<p class="text-muted">Lower is better</p>
+								<p>The drag of the ship divided by the number of engines.</p>
+								<p class="mb-0">
+									A lower drag along with more engines allows the ship to reach a higher top speed.
+								</p>
+							</Hint>
+						</th>
 					{/if}
 				{/if}
 			</tr>
 		</thead>
+
 		<tbody>
+			<!-- makes the first visible row different -->
+			<tr class="d-none" />
+
 			{#each filteredShips as ship}
 				<tr>
 					{#if $params.cols.image}
@@ -583,8 +689,8 @@
 
 					{#if $params.cols.engines}
 						{#if $params.expand.engines}
-							{#each ENGINE_SIZES as size}
-								<td>
+							{#each enums.engines as size}
+								<td style="background-color: rgba(var(--bs-green-rgb), 0.2)">
 									{ship.engines[size] || '-'}
 								</td>
 							{/each}
@@ -599,8 +705,8 @@
 
 					{#if $params.cols.shields}
 						{#if $params.expand.shields}
-							{#each SHIELD_SIZES as size}
-								<td>
+							{#each enums.shields as size}
+								<td style="background-color: rgba(var(--bs-primary-rgb), 0.2)">
 									{ship.shields[size] || '-'}
 								</td>
 							{/each}
@@ -615,8 +721,8 @@
 
 					{#if $params.cols.weapons}
 						{#if $params.expand.weapons}
-							{#each WEAPON_SIZES as size}
-								<td>
+							{#each enums.weapons as size}
+								<td style="background-color: rgba(var(--bs-red-rgb), 0.2)">
 									{ship.weapons[size] || '-'}
 								</td>
 							{/each}
@@ -631,15 +737,15 @@
 
 					{#if $params.cols.turrets}
 						{#if $params.expand.turrets}
-							{#each TURRET_SIZES as size}
-								<td>
+							{#each enums.turrets as size}
+								<td style="background-color: rgba(var(--bs-yellow-rgb), 0.2)">
 									{ship.turrets[size] || '-'}
 								</td>
 							{/each}
 						{:else}
 							<td>
 								{#each Object.entries(ship.turrets).filter(([, val]) => val > 0) as [size, total]}
-									<span class="badge text-bg-pink me-2">{total} {size}</span>
+									<span class="badge text-bg-yellow me-2">{total} {size}</span>
 								{/each}
 							</td>
 						{/if}
@@ -647,13 +753,15 @@
 
 					{#if $params.cols.cargo}
 						{#if $params.expand.cargo}
-							{#each CARGO_TYPES as type}
-								<td>{ship.cargo[type] || '-'}</td>
+							{#each enums.cargo as type}
+								<td style="background-color: rgba(var(--bs-green-rgb), 0.2)">
+									{ship.cargo[type] || '-'}
+								</td>
 							{/each}
 						{:else}
 							<td>
 								{#each Object.entries(ship.cargo).filter(([, val]) => val > 0) as [type, total]}
-									<span class="badge text-bg-light me-2">{total} {CARGO_NAMES[type]}</span>
+									<span class="badge text-bg-green me-2">{total} {names.cargo[type]}</span>
 								{/each}
 							</td>
 						{/if}
@@ -661,13 +769,15 @@
 
 					{#if $params.cols.docks}
 						{#if $params.expand.docks}
-							{#each DOCK_SIZES as size}
-								<td>{ship.docks[size] || '-'}</td>
+							{#each enums.docks as size}
+								<td style="background-color: rgba(var(--bs-primary-rgb), 0.2)">
+									{ship.docks[size] || '-'}
+								</td>
 							{/each}
 						{:else}
 							<td>
 								{#each Object.entries(ship.docks).filter(([, val]) => val > 0) as [size, total]}
-									<span class="badge text-bg-indigo me-2">{total} {size}</span>
+									<span class="badge text-bg-primary me-2">{total} {size}</span>
 								{/each}
 							</td>
 						{/if}
@@ -675,13 +785,15 @@
 
 					{#if $params.cols.hangars}
 						{#if $params.expand.hangars}
-							{#each HANGER_SIZES as size}
-								<td>{ship.docks[size] || '-'}</td>
+							{#each enums.hangars as size}
+								<td style="background-color: rgba(var(--bs-red-rgb), 0.2)">
+									{ship.hangars[size] || '-'}
+								</td>
 							{/each}
 						{:else}
 							<td>
 								{#each Object.entries(ship.docks).filter(([, val]) => val > 0) as [size, total]}
-									<span class="badge text-bg-purple me-2">{total} {size}</span>
+									<span class="badge text-bg-red me-2">{total} {size}</span>
 								{/each}
 							</td>
 						{/if}
@@ -695,18 +807,30 @@
 						<td>{ship.hull || '-'}</td>
 					{/if}
 
-					{#if $params.cols.mass}
-						<td>{ship.mass > 0 ? ship.mass.toFixed(2) : '-'}</td>
-					{/if}
-
 					{#if $params.cols.timeToMaxSpeed}
 						<td>{ship.timeToMaxSpeed > 0 ? ship.timeToMaxSpeed.toFixed(2) : '-'}</td>
 					{/if}
 
+					{#if $params.cols.massPerEngine}
+						{#if $params.expand.mass}
+							{#each enums.engines as size}
+								<td style="background-color: rgba(var(--bs-yellow-rgb), 0.2)">
+									{ship.massPerEngine[size] > 0 ? ship.massPerEngine[size].toFixed(2) : '-'}
+								</td>
+							{/each}
+						{:else}
+							<td>
+								{#each Object.entries(ship.massPerEngine).filter(([, val]) => val > 0) as [size, total]}
+									<span class="badge text-bg-yellow me-2">{total.toFixed(2)} {size}</span>
+								{/each}
+							</td>
+						{/if}
+					{/if}
+
 					{#if $params.cols.dragPerEngine}
 						{#if $params.expand.drag}
-							{#each ENGINE_SIZES as size}
-								<td>
+							{#each enums.engines as size}
+								<td style="background-color: rgba(var(--bs-green-rgb), 0.2)">
 									{ship.dragPerEngine[size] > 0 ? ship.dragPerEngine[size].toFixed(2) : '-'}
 								</td>
 							{/each}
@@ -725,12 +849,6 @@
 </div>
 
 <style lang="scss">
-	.btn-sm {
-		font-size: 0.6rem;
-		padding: 2px 4px;
-		margin: 0;
-	}
-
 	.table {
 		> thead {
 			> tr {
@@ -747,5 +865,12 @@
 				}
 			}
 		}
+	}
+
+	.capitalize {
+		text-transform: lowercase;
+	}
+	.capitalize::first-letter {
+		text-transform: uppercase;
 	}
 </style>
