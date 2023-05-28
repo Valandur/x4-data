@@ -690,8 +690,20 @@
 					{#if $params.cols.engines}
 						{#if $params.expand.engines}
 							{#each enums.engines as size}
-								<td style="background-color: rgba(var(--bs-green-rgb), 0.2)">
-									{ship.engines[size] || '-'}
+								{@const value = ship.engines[size]}
+								<td>
+									{#if value}
+										<div class="progress fs-5" style:height="1.2rem">
+											<div
+												class="progress-bar text-bg-green"
+												style="width: {(value / data.max.engines[size]) * 100}%"
+											>
+												{value}
+											</div>
+										</div>
+									{:else}
+										-
+									{/if}
 								</td>
 							{/each}
 						{:else}

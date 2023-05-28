@@ -55,11 +55,11 @@ export const load: PageServerLoad = async ({ parent }) => {
 
 	const max: Maxes = {
 		engines: {
-			[Size.XS]: 0,
-			[Size.S]: 0,
+			[Size.XS]: 0, // not used
+			[Size.S]: allShips.reduce((acc, s) => Math.max(acc, s.engines[Size.S] ?? 0), 0),
 			[Size.M]: allShips.reduce((acc, s) => Math.max(acc, s.engines[Size.M] ?? 0), 0),
-			[Size.L]: 0,
-			[Size.XL]: 0
+			[Size.L]: allShips.reduce((acc, s) => Math.max(acc, s.engines[Size.L] ?? 0), 0),
+			[Size.XL]: allShips.reduce((acc, s) => Math.max(acc, s.engines[Size.XL] ?? 0), 0)
 		}
 	};
 
