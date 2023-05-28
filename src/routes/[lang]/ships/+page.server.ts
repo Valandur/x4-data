@@ -4,6 +4,8 @@ import { CARGO_TYPES, Size } from '$lib/models/Constants';
 
 import type { PageServerLoad } from './$types';
 
+type StringMap = Record<string, string>;
+
 const ENUMS = {
 	ships: [Size.S, Size.M, Size.L, Size.XL],
 	engines: [Size.S, Size.M, Size.L, Size.XL],
@@ -21,14 +23,18 @@ const NAMES = {
 		CONDENSATE: 'CS',
 		LIQUID: 'L',
 		SOLID: 'S'
-	} as Record<string, string>,
+	} as StringMap,
 	columns: {
 		ident: 'Name',
 		type: 'Role',
 		timeToMaxSpeed: 'Time to Max Speed (TtMS)',
 		dragPerEngine: 'Drag per Engine (DpE)'
-	} as Record<string, string>
+	} as StringMap
 };
+
+interface Maxes {
+	engines: Record<Size, number>;
+}
 
 export const load: PageServerLoad = async ({ parent }) => {
 	let allShips = ships.getAll();
@@ -47,7 +53,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 		.filter((r, i, arr) => arr.indexOf(r) === i)
 		.sort((a, b) => a.localeCompare(b));
 
-	/*const max: Maxes = {
+	const max: Maxes = {
 		engines: {
 			[Size.XS]: 0,
 			[Size.S]: 0,
@@ -55,7 +61,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 			[Size.L]: 0,
 			[Size.XL]: 0
 		}
-	};*/
+	};
 
 	return {
 		ships: allShips,
@@ -64,6 +70,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 			roles,
 			purposes
 		},
-		names: NAMES
+		names: NAMES,
+		max
 	};
 };
