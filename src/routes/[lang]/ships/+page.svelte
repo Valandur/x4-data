@@ -695,7 +695,7 @@
 									{#if value}
 										<div class="progress fs-5" style:height="1.2rem">
 											<div
-												class="progress-bar text-bg-green"
+												class="progress-bar text-bg-green fw-bold overflow-visible"
 												style="width: {(value / data.max.engines[size]) * 100}%"
 											>
 												{value}
@@ -718,8 +718,20 @@
 					{#if $params.cols.shields}
 						{#if $params.expand.shields}
 							{#each enums.shields as size}
-								<td style="background-color: rgba(var(--bs-primary-rgb), 0.2)">
-									{ship.shields[size] || '-'}
+								{@const value = ship.shields[size]}
+								<td>
+									{#if value}
+										<div class="progress fs-5" style:height="1.2rem">
+											<div
+												class="progress-bar text-bg-primary fw-bold overflow-visible"
+												style="width: {(value / data.max.shields[size]) * 100}%"
+											>
+												{value}
+											</div>
+										</div>
+									{:else}
+										-
+									{/if}
 								</td>
 							{/each}
 						{:else}
@@ -734,8 +746,20 @@
 					{#if $params.cols.weapons}
 						{#if $params.expand.weapons}
 							{#each enums.weapons as size}
-								<td style="background-color: rgba(var(--bs-red-rgb), 0.2)">
-									{ship.weapons[size] || '-'}
+								{@const value = ship.weapons[size]}
+								<td>
+									{#if value}
+										<div class="progress fs-5" style:height="1.2rem">
+											<div
+												class="progress-bar text-bg-red fw-bold overflow-visible"
+												style="width: {(value / data.max.weapons[size]) * 100}%"
+											>
+												{value}
+											</div>
+										</div>
+									{:else}
+										-
+									{/if}
 								</td>
 							{/each}
 						{:else}
@@ -750,8 +774,20 @@
 					{#if $params.cols.turrets}
 						{#if $params.expand.turrets}
 							{#each enums.turrets as size}
-								<td style="background-color: rgba(var(--bs-yellow-rgb), 0.2)">
-									{ship.turrets[size] || '-'}
+								{@const value = ship.turrets[size]}
+								<td>
+									{#if value}
+										<div class="progress fs-5" style:height="1.2rem">
+											<div
+												class="progress-bar text-bg-yellow fw-bold overflow-visible"
+												style="width: {(value / data.max.turrets[size]) * 100}%"
+											>
+												{value}
+											</div>
+										</div>
+									{:else}
+										-
+									{/if}
 								</td>
 							{/each}
 						{:else}
@@ -766,8 +802,20 @@
 					{#if $params.cols.cargo}
 						{#if $params.expand.cargo}
 							{#each enums.cargo as type}
-								<td style="background-color: rgba(var(--bs-green-rgb), 0.2)">
-									{ship.cargo[type] || '-'}
+								{@const value = ship.cargo[type]}
+								<td>
+									{#if value}
+										<div class="progress fs-5" style:height="1.2rem">
+											<div
+												class="progress-bar text-bg-green fw-bold overflow-visible"
+												style="width: {(value / data.max.cargo[type]) * 100}%"
+											>
+												{value}
+											</div>
+										</div>
+									{:else}
+										-
+									{/if}
 								</td>
 							{/each}
 						{:else}
@@ -782,8 +830,20 @@
 					{#if $params.cols.docks}
 						{#if $params.expand.docks}
 							{#each enums.docks as size}
-								<td style="background-color: rgba(var(--bs-primary-rgb), 0.2)">
-									{ship.docks[size] || '-'}
+								{@const value = ship.docks[size]}
+								<td>
+									{#if value}
+										<div class="progress fs-5" style:height="1.2rem">
+											<div
+												class="progress-bar text-bg-primary fw-bold overflow-visible"
+												style="width: {(value / data.max.docks[size]) * 100}%"
+											>
+												{value}
+											</div>
+										</div>
+									{:else}
+										-
+									{/if}
 								</td>
 							{/each}
 						{:else}
@@ -798,8 +858,20 @@
 					{#if $params.cols.hangars}
 						{#if $params.expand.hangars}
 							{#each enums.hangars as size}
-								<td style="background-color: rgba(var(--bs-red-rgb), 0.2)">
-									{ship.hangars[size] || '-'}
+								{@const value = ship.hangars[size]}
+								<td>
+									{#if value}
+										<div class="progress fs-5" style:height="1.2rem">
+											<div
+												class="progress-bar text-bg-red fw-bold overflow-visible"
+												style="width: {(value / data.max.hangars[size]) * 100}%"
+											>
+												{value}
+											</div>
+										</div>
+									{:else}
+										-
+									{/if}
 								</td>
 							{/each}
 						{:else}
@@ -826,8 +898,20 @@
 					{#if $params.cols.massPerEngine}
 						{#if $params.expand.mass}
 							{#each enums.engines as size}
-								<td style="background-color: rgba(var(--bs-yellow-rgb), 0.2)">
-									{ship.massPerEngine[size] > 0 ? ship.massPerEngine[size].toFixed(2) : '-'}
+								{@const value = ship.massPerEngine[size]}
+								<td>
+									{#if value}
+										<div class="progress fs-5" style:height="1.2rem">
+											<div
+												class="progress-bar text-bg-yellow fw-bold overflow-visible"
+												style="width: {(value / data.max.massPerEngine[size]) * 100}%"
+											>
+												{value.toFixed(1)}
+											</div>
+										</div>
+									{:else}
+										-
+									{/if}
 								</td>
 							{/each}
 						{:else}
@@ -842,8 +926,20 @@
 					{#if $params.cols.dragPerEngine}
 						{#if $params.expand.drag}
 							{#each enums.engines as size}
-								<td style="background-color: rgba(var(--bs-green-rgb), 0.2)">
-									{ship.dragPerEngine[size] > 0 ? ship.dragPerEngine[size].toFixed(2) : '-'}
+								{@const value = ship.dragPerEngine[size]}
+								<td>
+									{#if value}
+										<div class="progress fs-5" style:height="1.2rem">
+											<div
+												class="progress-bar text-bg-green fw-bold overflow-visible"
+												style="width: {(value / data.max.dragPerEngine[size]) * 100}%"
+											>
+												{value.toFixed(1)}
+											</div>
+										</div>
+									{:else}
+										-
+									{/if}
 								</td>
 							{/each}
 						{:else}

@@ -9,6 +9,7 @@ import type { Ship } from '$lib/models/Ship';
 
 import { Logger } from './logger';
 import { macros } from './macro';
+import { emptyStatsPerSize } from './util';
 
 const IMAGE_PATH = 'data/images/ships';
 
@@ -66,12 +67,12 @@ class ShipService {
 			return null;
 		}
 
-		const engines = this.emptyStatsPerSize();
-		const shields = this.emptyStatsPerSize();
-		const weapons = this.emptyStatsPerSize();
-		const turrets = this.emptyStatsPerSize();
-		const docks = this.emptyStatsPerSize();
-		const hangars = this.emptyStatsPerSize();
+		const engines = emptyStatsPerSize();
+		const shields = emptyStatsPerSize();
+		const weapons = emptyStatsPerSize();
+		const turrets = emptyStatsPerSize();
+		const docks = emptyStatsPerSize();
+		const hangars = emptyStatsPerSize();
 		const cargo: Record<CargoType, number> = {
 			[CargoType.CONDENSATE]: 0,
 			[CargoType.CONTAINER]: 0,
@@ -162,7 +163,7 @@ class ShipService {
 		}
 
 		const mass = macro.properties.physics?.mass ?? 0;
-		const massPerEngine = this.emptyStatsPerSize();
+		const massPerEngine = emptyStatsPerSize();
 		for (const size of SIZES) {
 			const ratio = mass / engines[size];
 			if (isFinite(ratio)) {
@@ -171,7 +172,7 @@ class ShipService {
 		}
 
 		const drag = macro.properties.physics?.drag.forward ?? 0;
-		const dragPerEngine = this.emptyStatsPerSize();
+		const dragPerEngine = emptyStatsPerSize();
 		for (const size of SIZES) {
 			const ratio = drag / engines[size];
 			if (isFinite(ratio)) {
@@ -198,16 +199,6 @@ class ShipService {
 			cargo,
 			docks,
 			hangars
-		};
-	}
-
-	private emptyStatsPerSize(): Record<Size, number> {
-		return {
-			[Size.XS]: 0,
-			[Size.S]: 0,
-			[Size.M]: 0,
-			[Size.L]: 0,
-			[Size.XL]: 0
 		};
 	}
 

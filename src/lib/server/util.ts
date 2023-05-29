@@ -3,6 +3,8 @@ import { MultiBar, Presets } from 'cli-progress';
 import { readdir, stat } from 'node:fs/promises';
 import chalk from 'chalk';
 
+import { Size } from '$lib/models/Constants';
+
 import type { Logger } from './logger';
 
 export async function getAllFilesInDir(logger: Logger, dir: string, ext?: string) {
@@ -92,4 +94,14 @@ export function deepMerge(
 	}
 
 	return target;
+}
+
+export function emptyStatsPerSize(): Record<Size, number> {
+	return {
+		[Size.XS]: 0,
+		[Size.S]: 0,
+		[Size.M]: 0,
+		[Size.L]: 0,
+		[Size.XL]: 0
+	};
 }
