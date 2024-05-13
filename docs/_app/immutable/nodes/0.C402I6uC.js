@@ -1,0 +1,1 @@
+import{c as e,h as s,s as r,a as c,$ as m,f as d}from"../chunks/disclose-version.B974EOVx.js";function h(t,o){var a=e();s(i=>{m.title="X4 Data"});var n=d(a);r(n,o.children,{}),c(t,a)}export{h as component};
