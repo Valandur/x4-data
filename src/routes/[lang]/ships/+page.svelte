@@ -456,6 +456,9 @@
 			</tr>
 
 			<tr>
+				<!-- Checkbox column is always visible -->
+				<th></th>
+
 				{#if $params.cols.image}
 					<th></th>
 				{/if}
