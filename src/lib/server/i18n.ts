@@ -83,7 +83,12 @@ class I18NService {
 			return;
 		}
 
-		const ts: Map<string, string> = new Map();
+		let ts = this.translations.get(shortCode);
+		if (!ts) {
+			ts = new Map();
+			this.translations.set(shortCode, ts);
+		}
+
 		for (const page of xml.language.page) {
 			if (!page.t.length) {
 				page.t = [page.t];
@@ -92,7 +97,6 @@ class I18NService {
 				ts.set(`${page.id},${translation.id}`, translation['#text']);
 			}
 		}
-		this.translations.set(shortCode, ts);
 	}
 
 	public async done(): Promise<void> {

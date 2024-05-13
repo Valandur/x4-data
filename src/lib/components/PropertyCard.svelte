@@ -40,7 +40,7 @@
 	{#if complex.length > 0}
 		<ul class="list-group list-group-flush">
 			<!-- needed for the horizontal line -->
-			<li class="list-group-item p-0" />
+			<li class="list-group-item p-0"></li>
 
 			{#each complex as [key, value]}
 				{@const isOpen = open.includes(key)}
@@ -50,7 +50,7 @@
 						class="btn flex-fill card-header fw-bold text-start"
 						on:click={() => toggleOpen(key, !isOpen)}
 					>
-						<i class="fa-solid fa-caret-{isOpen ? 'down' : 'right'} me-2" />
+						<i class="fa-solid fa-caret-{isOpen ? 'down' : 'right'} me-2"></i>
 						{key}
 					</button>
 				</li>
@@ -83,9 +83,9 @@
 	{/if}
 
 	<div class="card-arrow">
-		<div class="card-arrow-top-left" />
-		<div class="card-arrow-top-right" />
-		<div class="card-arrow-bottom-left" />
-		<div class="card-arrow-bottom-right" />
+		<div class="card-arrow-top-left"></div>
+		<div class="card-arrow-top-right"></div>
+		<div class="card-arrow-bottom-left"></div>
+		<div class="card-arrow-bottom-right"></div>
 	</div>
 </div>

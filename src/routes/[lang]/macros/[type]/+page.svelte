@@ -35,7 +35,7 @@
 							({macro.alias})
 						{/if}
 					</td>
-					<td>{macro.component?.ref ?? '-'}</td>
+					<td>{!!macro.component && 'ref' in macro.component ? macro.component.ref : '-'}</td>
 					<td>
 						{#each Object.keys(macro.properties) as prop}
 							<span class="badge bg-primary me-1">{prop}</span>

@@ -65,17 +65,17 @@
 <div id="header" class="app-header">
 	<div class="desktop-toggler">
 		<button type="button" class="menu-toggler" on:click={() => onToggleCollapse(false)}>
-			<span class="bar" />
-			<span class="bar" />
-			<span class="bar" />
+			<span class="bar"></span>
+			<span class="bar"></span>
+			<span class="bar"></span>
 		</button>
 	</div>
 
 	<div class="mobile-toggler">
 		<button type="button" class="menu-toggler" on:click={() => onToggleCollapse(true)}>
-			<span class="bar" />
-			<span class="bar" />
-			<span class="bar" />
+			<span class="bar"></span>
+			<span class="bar"></span>
+			<span class="bar"></span>
 		</button>
 	</div>
 
@@ -98,7 +98,7 @@
 					bind:checked={$settings.darkTheme}
 				/>
 				<label class="form-check-label" for="customSwitch1">
-					<i class="fa-solid fa-moon" />
+					<i class="fa-solid fa-moon"></i>
 				</label>
 			</div>
 		</div>
@@ -152,27 +152,27 @@
 
 				<div class="menu-item" class:active={$page.url.pathname === `/${lang}`}>
 					<a href="/{lang}" class="menu-link">
-						<span class="menu-icon"><i class="fa-solid fa-home" /></span>
+						<span class="menu-icon"><i class="fa-solid fa-home"></i></span>
 						<span class="menu-text">Home</span>
 					</a>
 				</div>
 
 				<div class="menu-item" class:active={$page.url.pathname === `/${lang}/ships`}>
 					<a href="/{lang}/ships" class="menu-link">
-						<span class="menu-icon"><i class="fa-solid fa-shuttle-space" /></span>
+						<span class="menu-icon"><i class="fa-solid fa-shuttle-space"></i></span>
 						<span class="menu-text">Ships</span>
 					</a>
 				</div>
 				<div class="menu-item" class:active={$page.url.pathname.startsWith(`/${lang}/components`)}>
 					<a href="/{lang}/components" class="menu-link">
-						<span class="menu-icon"><i class="fa-solid fa-object-ungroup" /></span>
+						<span class="menu-icon"><i class="fa-solid fa-object-ungroup"></i></span>
 						<span class="menu-text">Components</span>
 					</a>
 				</div>
 
 				<div class="menu-item" class:active={$page.url.pathname.startsWith(`/${lang}/macros`)}>
 					<a href="/{lang}/macros" class="menu-link">
-						<span class="menu-icon"><i class="fa-solid fa-microchip" /></span>
+						<span class="menu-icon"><i class="fa-solid fa-microchip"></i></span>
 						<span class="menu-text">Macros</span>
 					</a>
 				</div>
@@ -180,7 +180,7 @@
 		</div>
 	</div>
 
-	<button class="app-sidebar-mobile-backdrop" on:click={() => onToggleCollapse(true)} />
+	<button class="app-sidebar-mobile-backdrop" on:click={() => onToggleCollapse(true)}></button>
 </sidebar>
 
 <div id="content" class="app-content">
@@ -188,5 +188,5 @@
 </div>
 
 <button class="btn btn-scroll-top {scrollY > 10 ? 'show' : 'fade'}" on:click={() => (scrollY = 0)}>
-	<i class="fa fa-arrow-up" />
+	<i class="fa fa-arrow-up"></i>
 </button>

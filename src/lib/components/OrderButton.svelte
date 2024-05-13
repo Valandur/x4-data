@@ -36,11 +36,11 @@
 		on:click={onOrderBy}
 	>
 		<slot />
-		<i class="fa-solid fa-sort{sortIcon} ms-1" />
+		<i class="fa-solid fa-sort{sortIcon} ms-1"></i>
 	</button>
 	{#if showDelete}
 		<button class="btn btn-sm btn-danger" on:click={onDelete}>
-			<i class="fa-solid fa-x" />
+			<i class="fa-solid fa-x"></i>
 		</button>
 	{/if}
 	<slot name="attach" />

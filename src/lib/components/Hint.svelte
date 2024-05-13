@@ -6,7 +6,7 @@
 
 <span class="position-relative" use:clickOutside on:outclick={() => (show = false)}>
 	<button type="button" class="btn p-0" on:click={() => (show = !show)}>
-		<i class="fa-solid fa-info-circle text-primary" />
+		<i class="fa-solid fa-info-circle text-primary"></i>
 	</button>
 
 	{#if show}

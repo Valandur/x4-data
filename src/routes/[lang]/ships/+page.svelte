@@ -151,7 +151,7 @@
 						class="btn btn-{$params.text ? '' : 'outline-'}danger"
 						on:click={() => ($params.text = '')}
 					>
-						<i class="fa-solid fa-remove" />
+						<i class="fa-solid fa-remove"></i>
 					</button>
 				</div>
 			</div>
@@ -241,7 +241,7 @@
 						</OrderButton>
 					{/each}
 					<button class="btn btn-sm btn-danger mb-1" on:click={() => ($params.order = [])}>
-						<i class="fa-solid fa-trash" />
+						<i class="fa-solid fa-trash"></i>
 					</button>
 				</div>
 			{:else}
@@ -255,8 +255,10 @@
 	<table id="table-ships" class="table table-striped table-bordered table-hover">
 		<thead class="table-dark">
 			<tr>
+				<td></td>
+
 				{#if $params.cols.image}
-					<th style:width="100px" />
+					<th style:width="100px"></th>
 				{/if}
 
 				<th>
@@ -291,7 +293,7 @@
 									class="btn btn-sm btn-secondary"
 									on:click={() => ($params.expand.engines = !$params.expand.engines)}
 								>
-									<i class="fa-solid fa-{$params.expand.engines ? 'minus' : 'plus'}" />
+									<i class="fa-solid fa-{$params.expand.engines ? 'minus' : 'plus'}"></i>
 								</button>
 							</svelte:fragment>
 						</OrderButton>
@@ -308,7 +310,7 @@
 									class="btn btn-sm btn-secondary"
 									on:click={() => ($params.expand.shields = !$params.expand.shields)}
 								>
-									<i class="fa-solid fa-{$params.expand.shields ? 'minus' : 'plus'}" />
+									<i class="fa-solid fa-{$params.expand.shields ? 'minus' : 'plus'}"></i>
 								</button>
 							</svelte:fragment>
 						</OrderButton>
@@ -325,7 +327,7 @@
 									class="btn btn-sm btn-secondary"
 									on:click={() => ($params.expand.weapons = !$params.expand.weapons)}
 								>
-									<i class="fa-solid fa-{$params.expand.weapons ? 'minus' : 'plus'}" />
+									<i class="fa-solid fa-{$params.expand.weapons ? 'minus' : 'plus'}"></i>
 								</button>
 							</svelte:fragment>
 						</OrderButton>
@@ -342,7 +344,7 @@
 									class="btn btn-sm btn-secondary"
 									on:click={() => ($params.expand.turrets = !$params.expand.turrets)}
 								>
-									<i class="fa-solid fa-{$params.expand.turrets ? 'minus' : 'plus'}" />
+									<i class="fa-solid fa-{$params.expand.turrets ? 'minus' : 'plus'}"></i>
 								</button>
 							</svelte:fragment>
 						</OrderButton>
@@ -359,7 +361,7 @@
 									class="btn btn-sm btn-secondary"
 									on:click={() => ($params.expand.cargo = !$params.expand.cargo)}
 								>
-									<i class="fa-solid fa-{$params.expand.cargo ? 'minus' : 'plus'}" />
+									<i class="fa-solid fa-{$params.expand.cargo ? 'minus' : 'plus'}"></i>
 								</button>
 							</svelte:fragment>
 						</OrderButton>
@@ -376,7 +378,7 @@
 									class="btn btn-sm btn-secondary"
 									on:click={() => ($params.expand.docks = !$params.expand.docks)}
 								>
-									<i class="fa-solid fa-{$params.expand.docks ? 'minus' : 'plus'}" />
+									<i class="fa-solid fa-{$params.expand.docks ? 'minus' : 'plus'}"></i>
 								</button>
 							</svelte:fragment>
 						</OrderButton>
@@ -393,7 +395,7 @@
 									class="btn btn-sm btn-secondary"
 									on:click={() => ($params.expand.hangars = !$params.expand.hangars)}
 								>
-									<i class="fa-solid fa-{$params.expand.hangars ? 'minus' : 'plus'}" />
+									<i class="fa-solid fa-{$params.expand.hangars ? 'minus' : 'plus'}"></i>
 								</button>
 							</svelte:fragment>
 						</OrderButton>
@@ -428,7 +430,7 @@
 									class="btn btn-sm btn-secondary"
 									on:click={() => ($params.expand.mass = !$params.expand.mass)}
 								>
-									<i class="fa-solid fa-{$params.expand.mass ? 'minus' : 'plus'}" />
+									<i class="fa-solid fa-{$params.expand.mass ? 'minus' : 'plus'}"></i>
 								</button>
 							</svelte:fragment>
 						</OrderButton>
@@ -445,7 +447,7 @@
 									class="btn btn-sm btn-secondary"
 									on:click={() => ($params.expand.drag = !$params.expand.drag)}
 								>
-									<i class="fa-solid fa-{$params.expand.drag ? 'minus' : 'plus'}" />
+									<i class="fa-solid fa-{$params.expand.drag ? 'minus' : 'plus'}"></i>
 								</button>
 							</svelte:fragment>
 						</OrderButton>
@@ -455,22 +457,22 @@
 
 			<tr>
 				{#if $params.cols.image}
-					<th />
+					<th></th>
 				{/if}
 
 				<!-- Name column is always visible -->
-				<th />
+				<th></th>
 
 				{#if $params.cols.size}
-					<th />
+					<th></th>
 				{/if}
 
 				{#if $params.cols.purpose}
-					<th />
+					<th></th>
 				{/if}
 
 				{#if $params.cols.role}
-					<th />
+					<th></th>
 				{/if}
 
 				{#if $params.cols.engines}
@@ -483,7 +485,7 @@
 							</th>
 						{/each}
 					{:else}
-						<th />
+						<th></th>
 					{/if}
 				{/if}
 
@@ -497,7 +499,7 @@
 							</th>
 						{/each}
 					{:else}
-						<th />
+						<th></th>
 					{/if}
 				{/if}
 
@@ -511,7 +513,7 @@
 							</th>
 						{/each}
 					{:else}
-						<th />
+						<th></th>
 					{/if}
 				{/if}
 
@@ -525,7 +527,7 @@
 							</th>
 						{/each}
 					{:else}
-						<th />
+						<th></th>
 					{/if}
 				{/if}
 
@@ -545,12 +547,14 @@
 								<p class="text-muted">More is better</p>
 								<p>The amount of each type of cargo the ship can carry.</p>
 								<table class="table table-smaller table-striped mb-0">
-									{#each enums.cargo as type}
-										<tr>
-											<td>{names.cargo[type]}</td>
-											<td><div class="d-inline-block m-0 p-0 capitalize">{type}</div></td>
-										</tr>
-									{/each}
+									<tbody>
+										{#each enums.cargo as type}
+											<tr>
+												<td>{names.cargo[type]}</td>
+												<td><div class="d-inline-block m-0 p-0 capitalize">{type}</div></td>
+											</tr>
+										{/each}
+									</tbody>
 								</table>
 							</Hint>
 						</th>
@@ -567,7 +571,7 @@
 							</th>
 						{/each}
 					{:else}
-						<th />
+						<th></th>
 					{/if}
 				{/if}
 
@@ -581,16 +585,16 @@
 							</th>
 						{/each}
 					{:else}
-						<th />
+						<th></th>
 					{/if}
 				{/if}
 
 				{#if $params.cols.crew}
-					<th />
+					<th></th>
 				{/if}
 
 				{#if $params.cols.hull}
-					<th />
+					<th></th>
 				{/if}
 
 				{#if $params.cols.timeToMaxSpeed}
@@ -657,10 +661,14 @@
 
 		<tbody>
 			<!-- makes the first visible row different -->
-			<tr class="d-none" />
+			<tr class="d-none"></tr>
 
 			{#each filteredShips as ship}
 				<tr>
+					<td>
+						<input class="" id="compare-{ship.name}" type="checkbox" />
+					</td>
+
 					{#if $params.cols.image}
 						<td class="p-0" style:vertical-align="middle">
 							<img

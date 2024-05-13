@@ -1,9 +1,8 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-
 	import ConnectionCard from '$lib/components/ConnectionCard.svelte';
 	import PropertyCard from '$lib/components/PropertyCard.svelte';
-	import type { Macro } from '$lib/models/Macro';
+
+	import type { PageData } from './$types';
 
 	export let data: PageData;
 	$: lang = data.lang;
@@ -61,13 +60,15 @@
 		</div>
 		<div class="row">
 			{#each conns as conn}
+				{@const link =
+					'resolved' in conn
+						? '/' + lang + '/macros/' + conn.resolved?.class + '/' + conn.resolved?.name
+						: null}
 				<div class="col-4">
 					<ConnectionCard
 						title={conn.ref}
 						name={conn.macro?.ref || '-'}
-						link={'resolved' in conn
-							? `/${lang}/macros/${conn.resolved?.class}/${conn.resolved?.name}`
-							: null}
+						{link}
 						extras={{ connection: conn.macro?.connection || '-' }}
 					/>
 				</div>
