@@ -29,6 +29,9 @@ class MacroService {
 	public getByName(name: string): Macro | undefined {
 		return this.macros.get(name);
 	}
+	public count(): number {
+		return this.macros.size;
+	}
 
 	public async setup(): Promise<boolean> {
 		this.macros.clear();

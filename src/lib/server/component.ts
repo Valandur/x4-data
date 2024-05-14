@@ -27,6 +27,9 @@ class ComponentService {
 	public getByName(name: string): Component | undefined {
 		return this.comps.get(name);
 	}
+	public count(): number {
+		return this.comps.size;
+	}
 
 	public async setup(): Promise<boolean> {
 		this.comps.clear();

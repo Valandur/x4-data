@@ -21,6 +21,9 @@ class ShipService {
 	public getAll() {
 		return this.ships;
 	}
+	public count() {
+		return this.ships.length;
+	}
 
 	public async setup(): Promise<boolean> {
 		this.ships = [];
@@ -206,14 +209,14 @@ class ShipService {
 		return tag === 'extralarge'
 			? Size.XL
 			: tag === 'large'
-			? Size.L
-			: tag === 'medium'
-			? Size.M
-			: tag === 'small'
-			? Size.S
-			: tag === 'extrasmall'
-			? Size.XS
-			: null;
+				? Size.L
+				: tag === 'medium'
+					? Size.M
+					: tag === 'small'
+						? Size.S
+						: tag === 'extrasmall'
+							? Size.XS
+							: null;
 	}
 }
 
