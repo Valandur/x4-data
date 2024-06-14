@@ -1,4 +1,6 @@
 <script lang="ts">
+	import format from 'date-fns/format';
+
 	import Card from '$lib/components/Card.svelte';
 
 	import type { PageData } from './$types';
@@ -8,12 +10,19 @@
 	$: numShips = data.numShips;
 	$: numComponents = data.numComponents;
 	$: numMacros = data.numMacros;
+	$: lastUpdate = data.lastUpdate;
+	$: version = data.version;
+	$: build = data.build;
 </script>
 
 <h1 class="display-1 mb-5">Welcome to X4 Data</h1>
 
 <div class="row mb-5">
-	<Card category="Last Update" title="14.05.2024" subTitle="7.00 Beta (531045)" />
+	<Card
+		category="Last Update"
+		title={format(lastUpdate, 'dd.MM.yyyy')}
+		subTitle={`${version} (${build})`}
+	/>
 	<Card category="Ships" title={numShips.toString()} subTitle="&nbsp;" />
 	<Card category="Components" title={numComponents.toString()} subTitle="&nbsp;" />
 	<Card category="Macros" title={numMacros.toString()} subTitle="&nbsp;" />
