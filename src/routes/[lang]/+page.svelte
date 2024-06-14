@@ -1,5 +1,5 @@
 <script lang="ts">
-	import format from 'date-fns/format';
+	import { format } from 'date-fns/format';
 
 	import Card from '$lib/components/Card.svelte';
 
@@ -13,6 +13,7 @@
 	$: lastUpdate = data.lastUpdate;
 	$: version = data.version;
 	$: build = data.build;
+	$: tag = data.tag;
 </script>
 
 <h1 class="display-1 mb-5">Welcome to X4 Data</h1>
@@ -21,7 +22,7 @@
 	<Card
 		category="Last Update"
 		title={format(lastUpdate, 'dd.MM.yyyy')}
-		subTitle={`${version} (${build})`}
+		subTitle={`${version} ${tag} (${build})`}
 	/>
 	<Card category="Ships" title={numShips.toString()} subTitle="&nbsp;" />
 	<Card category="Components" title={numComponents.toString()} subTitle="&nbsp;" />

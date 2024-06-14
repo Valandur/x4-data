@@ -9,6 +9,7 @@ import { i18n } from '$lib/server/i18n';
 import { Logger } from '$lib/server/logger';
 import { macros } from '$lib/server/macro';
 import { ships } from '$lib/server/ship';
+import { meta } from '$lib/server/meta';
 
 const logger = new Logger('MAIN');
 
@@ -55,22 +56,25 @@ async function init() {
 	if (await ships.setup()) {
 		data.subscribe(ships);
 	}
-
-	if (data.subscriberCount > 0) {
-		await data.init();
+	if (await meta.setup()) {
+		data.subscribe(meta);
 	}
+
+	await data.init();
 
 	data.unsubscribe(i18n);
 	data.unsubscribe(defaults);
 	data.unsubscribe(macros);
 	data.unsubscribe(components);
 	data.unsubscribe(ships);
+	data.unsubscribe(meta);
 
 	await i18n.ready();
 	await defaults.ready();
 	await macros.ready();
 	await components.ready();
 	await ships.ready();
+	await meta.ready();
 
 	logger.info('Ready!');
 }
