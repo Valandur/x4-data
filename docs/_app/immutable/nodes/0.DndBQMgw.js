@@ -1,0 +1,1 @@
+import{c as e,h as n,s as r,a as m,$ as c,f as d}from"../chunks/disclose-version.V-uf_1lL.js";import{d as f}from"../chunks/misc.BGa3BRog.js";function h(t,o){var a=e();n(i=>{c.title="X4 Data"});var s=d(a);r(s,f(o),{}),m(t,a)}export{h as component};
